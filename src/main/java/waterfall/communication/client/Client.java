@@ -1,5 +1,6 @@
 package waterfall.communication.client;
 
+import waterfall.exception.ClientIsStoppedException;
 import waterfall.protocol.Command;
 
 public interface Client {
@@ -7,9 +8,9 @@ public interface Client {
 
     public void stopConnection();
 
-    public Command sendRequest(String request);
+    public void sendRequest(String request) throws ClientIsStoppedException;
 
-    public void receiveResponse(String response);
+    public Command receiveResponse(String response) throws ClientIsStoppedException;
 
     public void processCommand(Command command);
 }
