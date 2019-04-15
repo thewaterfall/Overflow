@@ -2,12 +2,12 @@ package waterfall.communication.server;
 
 import waterfall.protocol.Command;
 
-public interface ClientHandler {
+public interface ClientHandler extends Runnable {
     public void stopConnection();
 
-    public Command receiveRequest(String request);
+    public Command receiveRequest();
 
-    public void sendResponse(String response);
+    public void sendResponse(Command response);
 
-    public String processCommand(Command command);
+    public Command processCommand(Command command);
 }
