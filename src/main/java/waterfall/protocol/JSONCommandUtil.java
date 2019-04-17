@@ -42,11 +42,8 @@ public class JSONCommandUtil implements CommandUtil {
         if(!toConstruct.startsWith("/"))
             throw new IllegalCommandException("Command should start with '/' symbol");
 
-        String typeCommand = toConstruct.substring(0, toConstruct.indexOf(' '));
-
         Command command = new Command(commandType, status, from, toConstruct);
         command.setFullCommand(toConstruct);
-        command.setTypeCommand(typeCommand);
 
         return command;
     }
