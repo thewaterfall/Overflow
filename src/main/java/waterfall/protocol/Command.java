@@ -1,22 +1,37 @@
 package waterfall.protocol;
 
+import java.util.List;
+
 public class Command {
     private String type;
     private String status;
     private String source;
     private String fullCommand;
     private String typeCommand;
+    private List<String> attributesCommand;
     private String message;
 
     public Command() {
 
     }
 
-    public Command(String type, String status, String source, String message) {
+    public Command(String type, String status, String source, String fullCommand) {
         this.type = type;
         this.status = status;
         this.source = source;
-        this.message = message;
+        this.fullCommand = fullCommand;
+        this.message = fullCommand;
+
+        splitCommand(fullCommand);
+    }
+
+    private void splitCommand(String fullCommand) {
+        String[] splittedCommand = fullCommand.split("\\s+");
+
+        typeCommand = splittedCommand[0];
+        for (int i = 1; i < splittedCommand.length; i++) {
+            this.attributesCommand.add(splittedCommand[i]);
+        }
     }
 
     public String getType() {
@@ -65,5 +80,17 @@ public class Command {
 
     public void setTypeCommand(String typeCommand) {
         this.typeCommand = typeCommand;
+    }
+
+    public List<String> getAttributesCommand() {
+        return attributesCommand;
+    }
+
+    public void setAttributesCommand(List<String> attributesCommand) {
+        this.attributesCommand = attributesCommand;
+    }
+
+    public void addAttributeCommand(String attr) {
+        this.attributesCommand.add(attr);
     }
 }
