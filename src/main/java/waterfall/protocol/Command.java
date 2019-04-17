@@ -1,6 +1,8 @@
 package waterfall.protocol;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Command {
     private String type;
@@ -10,6 +12,7 @@ public class Command {
     private String typeCommand;
     private List<String> attributesCommand;
     private String message;
+    private Map<String, Object> parameters;
 
     public Command() {
 
@@ -21,6 +24,7 @@ public class Command {
         this.source = source;
         this.fullCommand = fullCommand;
         this.message = fullCommand;
+        this.parameters = new HashMap<>();
 
         splitCommand(fullCommand);
     }
@@ -92,5 +96,21 @@ public class Command {
 
     public void addAttributeCommand(String attr) {
         this.attributesCommand.add(attr);
+    }
+
+    public Map<String, Object> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
+    }
+
+    public void addParameter(String name, Object parameter) {
+        this.parameters.put(name, parameter);
+    }
+
+    public Object getParameter(String name) {
+        return parameters.get(name);
     }
 }
