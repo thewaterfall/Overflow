@@ -17,24 +17,16 @@ public class PlayerFactory implements Factory<Player>{
 
     @Override
     public Player getBean(Class classType) {
-        if(beanStorage.isEmpty()) {
-            return new Player();
-        } else {
-            return instantiateBean(classType);
-        }
+        return instantiateBean(classType);
     }
     @Override
     public Player getBean(String name) {
-        if(beanStorage.isEmpty()) {
-            return new Player();
-        } else {
-            return instantiateBean(name);
-        }
+        return instantiateBean(name);
     }
     @Override
     public void register(String name, Class classType) {
-        if(classType.getSuperclass() != Player.class)
-            throw new IllegalArgumentException("Class should be subclass of Player class");
+        if(!Arrays.asList(classType.getInterfaces()).contains(Player.class))
+            throw new IllegalArgumentException("Class should implement Player interface");
 
         beanStorage.put(name, classType);
     }
