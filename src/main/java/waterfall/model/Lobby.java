@@ -1,5 +1,7 @@
 package waterfall.model;
 
+import waterfall.game.Game;
+
 import javax.persistence.*;
 
 @Entity
@@ -21,6 +23,9 @@ public class Lobby {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "gametype_id")
     private GameType gameType;
+
+    @Transient
+    private Game game;
 
     public Lobby() {
 
@@ -77,6 +82,14 @@ public class Lobby {
 
     public void setGameType(GameType gameType) {
         this.gameType = gameType;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
     }
 
     @Override
