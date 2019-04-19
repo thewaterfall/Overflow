@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import waterfall.exception.IllegalCommandException;
 import waterfall.game.*;
 import waterfall.model.GameStat;
+import waterfall.model.GameType;
 import waterfall.model.Lobby;
 import waterfall.model.User;
 import waterfall.protocol.Command;
@@ -11,6 +12,7 @@ import waterfall.protocol.CommandConstants;
 import waterfall.protocol.CommandUtil;
 import waterfall.security.Security;
 import waterfall.service.GameStatService;
+import waterfall.service.GameTypeService;
 import waterfall.service.LobbyService;
 import waterfall.service.UserService;
 
@@ -42,6 +44,9 @@ public class SocketClientHandler implements ClientHandler {
 
     @Inject
     private GameStatService gameStatService;
+
+    @Inject
+    private GameTypeService gameTypeService;
 
     @Inject
     private UserService userService;
@@ -115,6 +120,7 @@ public class SocketClientHandler implements ClientHandler {
     @Override
     public Command processCommand(Command command) {
         command.setSource(CommandConstants.COMMAND_TYPE_HANDLER);
+        command.setTypeCommand(CommandConstants.COMMAND_TYPE_RESPONSE);
 
         // /login [username] [password]
         if(command.getTypeCommand().equals("/login")) {
@@ -129,6 +135,8 @@ public class SocketClientHandler implements ClientHandler {
             onGameReady();
         } else if (command.getTypeCommand().equals("/move")) { // /move [from] [to]
             processMove(command);
+        } else if (command.getTypeCommand().equals("/leaderboard")) {
+            processLeaderboard(command);
         }
 
         return command;
@@ -141,10 +149,18 @@ public class SocketClientHandler implements ClientHandler {
         }
     }
 
-    private void processMove(Command command) {
-        command.setSource(CommandConstants.COMMAND_TYPE_HANDLER);
-        command.setTypeCommand(CommandConstants.COMMAND_TYPE_RESPONSE);
+    private void processLeaderboard(Command command) {
+        GameType gameType = gameTypeService.findByName(command.getAttributesCommand().get(1));
+        if (gameType != null) {
+            command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
+            command.setParameters("leaderboard", userService.getLeaderboard(gameType);
+        } else {
+            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
+            command.setMessage("There's no such game");
+        }
+    }
 
+    private void processMove(Command command) {
         String response = currentPlayer.makeMove(currentLobby.getGame(), currentLobby.getGame().convertToMove(
                 command.getAttributesCommand().get(1) + " " + command.getAttributesCommand().get(2)));
 
@@ -179,6 +195,8 @@ public class SocketClientHandler implements ClientHandler {
                 gameStatService.update(currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()));
                 command.setMessage(currentLobby.getOpponentFor(currentUser).getUsername() + " has won.");
             }
+
+            lobbyService.remove(currentLobby);
         }
 
         command.addParameter("board", currentLobby.getGame().getBoard());

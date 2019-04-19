@@ -2,8 +2,11 @@ package waterfall.service;
 
 import com.google.inject.Inject;
 import waterfall.dao.UserDAO;
+import waterfall.model.GameType;
 import waterfall.model.User;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
@@ -39,5 +42,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findAll() {
         return userDAO.findAll();
+    }
+
+    @Override
+    public List<User> getLeaderboard(GameType gameType) {
+        List<User> userList = new ArrayList<>();
+
+        for (User user : userDAO.findAll()) {
+            if (user.hasGameStat(gameType)) {
+                userList.add(user);
+            }
+        }
+
+        userList.sort(Comparator.comparing(o -> o.getGameStat(gameType).getWinAmount()));
+        return userList;
     }
 }

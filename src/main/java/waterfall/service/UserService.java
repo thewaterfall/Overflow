@@ -1,5 +1,6 @@
 package waterfall.service;
 
+import waterfall.model.GameType;
 import waterfall.model.User;
 
 import java.util.List;
@@ -16,4 +17,6 @@ public interface UserService {
     public User findByUsername(String username);
 
     public List<User> findAll();
+
+    public List<User> getLeaderboard(GameType gameType);
 }

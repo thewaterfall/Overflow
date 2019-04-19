@@ -135,6 +135,12 @@ public class SocketClient implements Client {
             board = (Board) command.getParameter("board");
             gui.updateBoard(board);
             gui.update();
+        } else if (command.getTypeCommand().equals("/leaderboard")) {
+            if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
+                gui.write(command.getParameter("leaderboard").toString());
+            } else {
+                gui.write(command.getMessage());
+            }
         }
 
 
