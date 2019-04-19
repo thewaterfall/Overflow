@@ -31,8 +31,7 @@ public class Lobby {
 
     }
 
-    public Lobby(Integer id, User firstUser, User secondUser, GameType gameType) {
-        this.id = id;
+    public Lobby(User firstUser, User secondUser, GameType gameType) {
         this.firstUser = firstUser;
         this.secondUser = secondUser;
         this.gameType = gameType;

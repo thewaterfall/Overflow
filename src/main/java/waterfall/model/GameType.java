@@ -17,8 +17,7 @@ public class GameType {
 
     }
 
-    public GameType(Integer id, String type) {
-        this.id = id;
+    public GameType(String type) {
         this.type = type;
     }
 
