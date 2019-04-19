@@ -1,5 +1,14 @@
 package waterfall.communication.server;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import waterfall.game.Factory;
+import waterfall.game.GameFactory;
+import waterfall.game.PlayerFactory;
+import waterfall.game.UserPlayer;
+import waterfall.game.chess.ChessGame;
+import waterfall.injection.Module;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -12,6 +21,9 @@ public class SocketServer implements Server {
     private ServerSocket serverSocket;
     private ExecutorService threadPool;
     private List<SocketClientHandler> clientHandlerList;
+    private Injector injector;
+    private Factory gameFactory;
+    private Factory playerFactory;
 
     private int port;
 
@@ -21,6 +33,13 @@ public class SocketServer implements Server {
         this.port = port;
         this.threadPool = Executors.newFixedThreadPool(clients);
         this.clientHandlerList = new ArrayList<>(clients);
+        this.injector = Guice.createInjector(new Module());
+
+        this.gameFactory = new GameFactory();
+        this.gameFactory.register("chess", ChessGame.class);
+
+        this.playerFactory = new PlayerFactory();
+        this.playerFactory.register("chess", UserPlayer.class);
     }
 
     @Override
@@ -40,7 +59,7 @@ public class SocketServer implements Server {
                 e.printStackTrace();
             }
 
-            SocketClientHandler clientHandler = new SocketClientHandler(socket, clientHandlerList);
+            SocketClientHandler clientHandler = injector.getInstance(SocketClientHandler.class);
             clientHandlerList.add(clientHandler);
 
             threadPool.execute(clientHandler);

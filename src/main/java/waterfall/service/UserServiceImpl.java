@@ -1,5 +1,6 @@
 package waterfall.service;
 
+import com.google.inject.Inject;
 import waterfall.dao.UserDAO;
 import waterfall.model.User;
 
@@ -7,6 +8,7 @@ import java.util.List;
 
 public class UserServiceImpl implements UserService {
 
+    @Inject
     private UserDAO userDAO;
 
     @Override

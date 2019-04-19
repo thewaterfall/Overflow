@@ -1,5 +1,6 @@
 package waterfall.service;
 
+import com.google.inject.Inject;
 import waterfall.dao.GameTypeDAO;
 import waterfall.model.GameType;
 
@@ -7,6 +8,7 @@ import java.util.List;
 
 public class GameTypeServiceImpl implements  GameTypeService {
 
+    @Inject
     private GameTypeDAO gameTypeDAO;
 
     @Override

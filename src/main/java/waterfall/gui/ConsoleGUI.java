@@ -1,19 +1,30 @@
 package waterfall.gui;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import waterfall.communication.client.SocketClient;
 import waterfall.exception.ClientIsStoppedException;
 import waterfall.game.Board;
+import waterfall.injection.Module;
 
 import java.util.Scanner;
 
 public class ConsoleGUI implements GUI {
     private SocketClient socketClient;
     private Board board;
+    private Injector injector;
 
     private Scanner scanner;
 
     public ConsoleGUI(String iphost, int port) {
-        this.socketClient = new SocketClient(iphost, port, this);
+        this.injector = Guice.createInjector(new Module());
+
+        this.socketClient = injector.getInstance(SocketClient.class);
+        this.socketClient.setGui(this);
+        this.socketClient.setIphost(iphost);
+        this.socketClient.setPort(port);
+
+
         this.scanner = new Scanner(System.in);
     }
 

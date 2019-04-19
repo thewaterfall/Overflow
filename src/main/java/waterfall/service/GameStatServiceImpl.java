@@ -1,5 +1,6 @@
 package waterfall.service;
 
+import com.google.inject.Inject;
 import waterfall.dao.GameStatDAO;
 import waterfall.dao.UserDAO;
 import waterfall.model.GameStat;
@@ -10,7 +11,10 @@ import java.util.List;
 
 public class GameStatServiceImpl implements GameStatService {
 
+    @Inject
     private GameStatDAO gameStatDAO;
+
+    @Inject
     private UserDAO userDAO;
 
     @Override

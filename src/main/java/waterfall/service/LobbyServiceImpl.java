@@ -1,5 +1,6 @@
 package waterfall.service;
 
+import com.google.inject.Inject;
 import waterfall.dao.LobbyDAO;
 import waterfall.model.GameType;
 import waterfall.model.Lobby;
@@ -9,6 +10,7 @@ import java.util.List;
 
 public class LobbyServiceImpl implements LobbyService {
 
+    @Inject
     private LobbyDAO lobbyDAO;
 
     @Override

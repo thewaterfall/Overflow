@@ -1,16 +1,14 @@
 package waterfall.communication.server;
 
+import com.google.inject.Inject;
 import waterfall.exception.IllegalCommandException;
-import waterfall.game.Factory;
-import waterfall.game.Game;
-import waterfall.game.Player;
+import waterfall.game.*;
 import waterfall.model.GameStat;
 import waterfall.model.Lobby;
 import waterfall.model.User;
 import waterfall.protocol.Command;
 import waterfall.protocol.CommandConstants;
 import waterfall.protocol.CommandUtil;
-import waterfall.protocol.JSONCommandUtil;
 import waterfall.security.Security;
 import waterfall.service.GameStatService;
 import waterfall.service.LobbyService;
@@ -29,14 +27,23 @@ public class SocketClientHandler implements ClientHandler {
     private List<SocketClientHandler> clientHandlerList;
     private ClientHandler opponent;
 
+    @Inject
     private CommandUtil commandUtil;
+
+    @Inject
     private Security security;
+
     private Lobby currentLobby;
     private User currentUser;
     private Player currentPlayer;
 
+    @Inject
     private LobbyService lobbyService;
+
+    @Inject
     private GameStatService gameStatService;
+
+    @Inject
     private UserService userService;
 
     private Factory gameFactory;
@@ -44,10 +51,9 @@ public class SocketClientHandler implements ClientHandler {
 
     private boolean isStopped = true;
 
-    public SocketClientHandler(Socket socket, List<SocketClientHandler> clientHandlerList) {
-        this.socket = socket;
-        this.clientHandlerList = clientHandlerList;
-        this.commandUtil = new JSONCommandUtil();
+    public SocketClientHandler() {
+        this.gameFactory = new GameFactory();
+        this.playerFactory = new PlayerFactory();
     }
 
     @Override
@@ -329,5 +335,37 @@ public class SocketClientHandler implements ClientHandler {
 
     public void setOpponent(ClientHandler opponent) {
         this.opponent = opponent;
+    }
+
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
+    public List<SocketClientHandler> getClientHandlerList() {
+        return clientHandlerList;
+    }
+
+    public void setClientHandlerList(List<SocketClientHandler> clientHandlerList) {
+        this.clientHandlerList = clientHandlerList;
+    }
+
+    public Factory getGameFactory() {
+        return gameFactory;
+    }
+
+    public void setGameFactory(Factory gameFactory) {
+        this.gameFactory = gameFactory;
+    }
+
+    public Factory getPlayerFactory() {
+        return playerFactory;
+    }
+
+    public void setPlayerFactory(Factory playerFactory) {
+        this.playerFactory = playerFactory;
     }
 }

@@ -1,5 +1,6 @@
 package waterfall.communication.client;
 
+import com.google.inject.Inject;
 import waterfall.exception.ClientIsStoppedException;
 import waterfall.exception.IllegalCommandException;
 import waterfall.game.Board;
@@ -8,7 +9,6 @@ import waterfall.model.User;
 import waterfall.protocol.Command;
 import waterfall.protocol.CommandConstants;
 import waterfall.protocol.CommandUtil;
-import waterfall.protocol.JSONCommandUtil;
 
 import java.io.*;
 import java.net.Socket;
@@ -28,13 +28,17 @@ public class SocketClient implements Client {
 
     private User user;
 
+    @Inject
     private CommandUtil commandUtil;
+
+    public SocketClient() {
+
+    }
 
     public SocketClient(String iphost, int port, GUI gui) {
         this.iphost = iphost;
         this.port = port;
         this.gui = gui;
-        this.commandUtil = new JSONCommandUtil();
     }
 
     @Override
@@ -139,5 +143,29 @@ public class SocketClient implements Client {
 
     public boolean isStopped() {
         return isStopped;
+    }
+
+    public GUI getGui() {
+        return gui;
+    }
+
+    public void setGui(GUI gui) {
+        this.gui = gui;
+    }
+
+    public String getIphost() {
+        return iphost;
+    }
+
+    public void setIphost(String iphost) {
+        this.iphost = iphost;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }
