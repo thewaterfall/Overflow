@@ -60,6 +60,9 @@ public class SocketServer implements Server {
             }
 
             SocketClientHandler clientHandler = injector.getInstance(SocketClientHandler.class);
+            clientHandler.setSocket(socket);
+            clientHandler.setClientHandlerList(clientHandlerList);
+
             clientHandlerList.add(clientHandler);
 
             threadPool.execute(clientHandler);

@@ -1,9 +1,12 @@
 package waterfall.security;
 
+import com.google.inject.Inject;
 import waterfall.model.User;
 import waterfall.service.UserService;
 
 public class SecurityImpl implements Security {
+
+    @Inject
     private UserService userService;
 
     @Override

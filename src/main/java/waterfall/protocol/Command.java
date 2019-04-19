@@ -1,5 +1,6 @@
 package waterfall.protocol;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class Command {
         this.fullCommand = fullCommand;
         this.message = fullCommand;
         this.parameters = new HashMap<>();
+        this.attributesCommand = new ArrayList<>();
 
         splitCommand(fullCommand);
     }

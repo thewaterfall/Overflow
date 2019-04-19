@@ -120,7 +120,7 @@ public class SocketClientHandler implements ClientHandler {
     @Override
     public Command processCommand(Command command) {
         command.setSource(CommandConstants.COMMAND_TYPE_HANDLER);
-        command.setTypeCommand(CommandConstants.COMMAND_TYPE_RESPONSE);
+        command.setType(CommandConstants.COMMAND_TYPE_RESPONSE);
 
         // /login [username] [password]
         if(command.getTypeCommand().equals("/login")) {
