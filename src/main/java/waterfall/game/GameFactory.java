@@ -17,6 +17,9 @@ public class GameFactory implements Factory<Game> {
 
     @Override
     public void register(String name, Class classType) {
+        if(!Arrays.asList(classType.getInterfaces()).contains(Game.class))
+            throw new IllegalArgumentException("Class should implement Game interface");
+
         beanStorage.put(name, classType);
     }
 
@@ -47,8 +50,9 @@ public class GameFactory implements Factory<Game> {
 
     private Game instantiateBean(Class classType) {
         Game game = null;
+
         for(Class clazz: beanStorage.values()) {
-            if(Arrays.asList(clazz.getInterfaces()).contains(classType)) {
+            if(clazz.equals(classType)) {
                 try {
                     game = (Game) clazz.newInstance();
                 } catch (InstantiationException e) {
