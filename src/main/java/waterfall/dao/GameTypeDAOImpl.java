@@ -16,7 +16,7 @@ public class GameTypeDAOImpl extends AbstractDAO<Integer, GameType> implements G
         HibernateUtil.openSessionWithTransaction();
         Query<GameType> query = HibernateUtil.getCurrentSession().createQuery("FROM GameType WHERE name = :name")
                 .setParameter("name", name);
-        HibernateUtil.closeSessionWithTransaction();;
+        HibernateUtil.closeSessionWithTransaction();
 
         return query.uniqueResult();
     }
