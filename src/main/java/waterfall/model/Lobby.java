@@ -37,6 +37,14 @@ public class Lobby {
         this.gameType = gameType;
     }
 
+    public User getOpponentFor(User user) {
+        if(user.equals(firstUser)) {
+            return secondUser;
+        } else {
+            return firstUser;
+        }
+    }
+
     public boolean isLobbyFull() {
         return firstUser != null && secondUser != null;
     }
