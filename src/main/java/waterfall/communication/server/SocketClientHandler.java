@@ -135,7 +135,7 @@ public class SocketClientHandler implements ClientHandler {
             onGameReady();
         } else if (command.getTypeCommand().equals("/move")) { // /move [from] [to]
             processMove(command);
-        } else if (command.getTypeCommand().equals("/leaderboard")) {
+        } else if (command.getTypeCommand().equals("/leaderboard")) { // /leaderboard [gameType]
             processLeaderboard(command);
         }
 
@@ -153,7 +153,8 @@ public class SocketClientHandler implements ClientHandler {
         GameType gameType = gameTypeService.findByName(command.getAttributesCommand().get(1));
         if (gameType != null) {
             command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
-            command.setParameters("leaderboard", userService.getLeaderboard(gameType);
+            command.addParameter("leaderboard", userService.getLeaderboard(gameType));
+            command.setMessage("Leaderbord for " + gameType.getType() + " game type");
         } else {
             command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
             command.setMessage("There's no such game");

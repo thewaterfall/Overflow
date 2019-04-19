@@ -131,16 +131,15 @@ public class SocketClient implements Client {
 
         } else if (command.getTypeCommand().equals("/broadcast")) {
 
-        } else if (command.getTypeCommand().equals("/move")) {
+        } else if (command.getTypeCommand().equals("/move")) {  // /move [from] [to]
             board = (Board) command.getParameter("board");
             gui.updateBoard(board);
             gui.update();
-        } else if (command.getTypeCommand().equals("/leaderboard")) {
+        } else if (command.getTypeCommand().equals("/leaderboard")) { // /leaderboard [gameType]
             if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
                 gui.write(command.getParameter("leaderboard").toString());
-            } else {
-                gui.write(command.getMessage());
             }
+
         }
 
 
