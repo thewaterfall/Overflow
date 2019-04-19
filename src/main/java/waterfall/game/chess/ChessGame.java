@@ -30,10 +30,10 @@ public class ChessGame implements Game {
     public String playMove(Move move, Player player) {
         String message = isValidMove(move.getStart(), move.getDestination(), player, false);
 
-        Tile fromTile = board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
+        Tile fromTile = (Tile) board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
         ChessPiece pieceToMove = fromTile.getPiece();
 
-        Tile toTile = board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
+        Tile toTile = (Tile) board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
         toTile.setPiece(pieceToMove);
 
         fromTile.empty();

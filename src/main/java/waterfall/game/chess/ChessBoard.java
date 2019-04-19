@@ -9,13 +9,16 @@ import java.util.ArrayList;
 public class ChessBoard implements Board {
     private final Tile[][] board;
 
+    private final char alphaCoordinates[] = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+
     public ChessBoard() {
         board = new Tile[8][8];
         initializeBoard();
         fillBoard();
     }
 
-    public Tile[][] getBoardArray() {
+    @Override
+    public Object[][] getBoardArray() {
         return board;
     }
 
@@ -94,5 +97,21 @@ public class ChessBoard implements Board {
         //kings
         board[0][4].setPiece(new King(ChessPiece.PieceColor.Black));
         board[7][4].setPiece(new King(ChessPiece.PieceColor.White));
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer toReturn = new StringBuffer();
+        toReturn.append("  0  1  2  3  4  5  6  7\n\n");
+
+        for (int i = 0; i < board.length; i++) {
+            toReturn.append(alphaCoordinates[i] + "  ");
+            for (int j = 0; j < board.length; j++) {
+                toReturn.append(board[i][j].getValue() + "  ");
+            }
+            toReturn.append("\n\n");
+        }
+
+        return toReturn.toString();
     }
 }
