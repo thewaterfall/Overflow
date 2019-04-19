@@ -30,6 +30,32 @@ public class User {
         this.password = password;
     }
 
+    public boolean hasGameStat(GameType gameType) {
+        boolean hasGameStat = false;
+
+        for (GameStat gameStat : gameStats) {
+            if (gameStat.getGameType().equals(gameType)) {
+                hasGameStat = true;
+                break;
+            }
+        }
+
+        return hasGameStat;
+    }
+
+    public GameStat getGameStat(GameType gameType) {
+        GameStat foundGameStat = null;
+
+        for (GameStat gameStat : gameStats) {
+            if (gameStat.getGameType().equals(gameType)) {
+                foundGameStat = gameStat;
+                break;
+            }
+        }
+
+        return foundGameStat;
+    }
+
     public Integer getId() {
         return id;
     }
