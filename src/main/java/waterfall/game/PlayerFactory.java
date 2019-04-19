@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PlayerFactory implements Factory<Player>{
-    private Map<String, Class> beanStorage;
+    private static Map<String, Class> beanStorage;
 
     public PlayerFactory() {
         this.beanStorage = new HashMap<>();
