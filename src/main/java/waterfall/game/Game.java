@@ -3,7 +3,7 @@ package waterfall.game;
 import java.util.List;
 
 public interface Game {
-    public String playMove();
+    public String playMove(Move move);
 
     public Board getBoard();
 
