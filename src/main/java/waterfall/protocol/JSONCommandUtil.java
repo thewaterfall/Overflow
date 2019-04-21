@@ -47,4 +47,9 @@ public class JSONCommandUtil implements CommandUtil {
 
         return command;
     }
+
+    @Override
+    public <V> V getParameter(Command command, String name, Class<V> classType) {
+        return objectMapper.convertValue(command.getParameter(name), classType);
+    }
 }
