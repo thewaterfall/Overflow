@@ -14,10 +14,11 @@ public class GameTypeDAOImpl extends AbstractDAO<Integer, GameType> implements G
     @Override
     public GameType findByName(String name) {
         HibernateUtil.openSessionWithTransaction();
-        Query<GameType> query = HibernateUtil.getCurrentSession().createQuery("FROM GameType WHERE name = :name")
+        Query<GameType> query = HibernateUtil.getCurrentSession().createQuery("FROM GameType WHERE type = :name")
                 .setParameter("name", name);
+        GameType gameType = query.getSingleResult();
         HibernateUtil.closeSessionWithTransaction();
 
-        return query.uniqueResult();
+        return gameType;
     }
 }

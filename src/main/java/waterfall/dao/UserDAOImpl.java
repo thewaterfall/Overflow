@@ -14,8 +14,9 @@ public class UserDAOImpl extends AbstractDAO<Integer, User> implements UserDAO {
         HibernateUtil.openSessionWithTransaction();
         Query<User> query = HibernateUtil.getCurrentSession().createQuery("FROM User WHERE username = :username")
                                                                 .setParameter("username", username);
+        User user = query.uniqueResult();
         HibernateUtil.closeSessionWithTransaction();
 
-        return query.uniqueResult();
+        return user;
     }
 }

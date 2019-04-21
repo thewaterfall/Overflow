@@ -15,20 +15,24 @@ public class LobbyDAOImpl extends AbstractDAO<Integer, Lobby> implements LobbyDA
     @Override
     public Lobby findByUser(User user) {
         HibernateUtil.openSessionWithTransaction();
-        Query<Lobby> query = HibernateUtil.getCurrentSession().createQuery(" FROM Lobby WHERE firstuser_id = :id OR seconduser_id = :id")
+        Query<Lobby> query = HibernateUtil.getCurrentSession().createQuery("FROM Lobby AS lobby JOIN lobby.users users " +
+                "WHERE users.id = :id")
                 .setParameter("id", user.getId());
+        Lobby lobby = query.uniqueResult();
         HibernateUtil.closeSessionWithTransaction();
 
-        return query.uniqueResult();
+        return lobby;
     }
 
     @Override
     public Lobby findByGameType(GameType gameType) {
         HibernateUtil.openSessionWithTransaction();
-        Query<Lobby> query = HibernateUtil.getCurrentSession().createQuery(" FROM Lobby WHERE gametype_id = :id")
+        Query<Lobby> query = HibernateUtil.getCurrentSession().createQuery("FROM Lobby AS lobby JOIN lobby.gameType AS gametype " +
+                "WHERE gametype.id = :id")
                 .setParameter("id", gameType.getId());
+        Lobby lobby = query.uniqueResult();
         HibernateUtil.closeSessionWithTransaction();
 
-        return query.uniqueResult();
+        return lobby;
     }
 }
