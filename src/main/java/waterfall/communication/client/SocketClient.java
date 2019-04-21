@@ -12,6 +12,7 @@ import waterfall.protocol.CommandUtil;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
 public class SocketClient implements Client {
     private GUI gui;
@@ -50,6 +51,8 @@ public class SocketClient implements Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        new Thread(new SocketReader()).start();
 
         isStopped = false;
     }
@@ -112,8 +115,8 @@ public class SocketClient implements Client {
     @Override
     public void communicate(String request) throws ClientIsStoppedException {
         sendRequest(request);
-        Command command = receiveResponse();
-        processCommand(command);
+//        Command command = receiveResponse();
+//        processCommand(command);
     }
 
     @Override
@@ -121,7 +124,7 @@ public class SocketClient implements Client {
         // /login [username] [password]
         if (command.getTypeCommand().equals("/login") &&
                 command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
-            user = (User) command.getParameter("user");
+            user = commandUtil.getParameter(command, "user", User.class);
         } else if (command.getTypeCommand().equals("/logout") &&
                 command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) { // /logout
             user = null;
@@ -132,12 +135,12 @@ public class SocketClient implements Client {
         } else if (command.getTypeCommand().equals("/broadcast")) {
 
         } else if (command.getTypeCommand().equals("/move")) {  // /move [from] [to]
-            board = (Board) command.getParameter("board");
+            board = commandUtil.getParameter(command, "board", Board.class);
             gui.updateBoard(board);
             gui.update();
         } else if (command.getTypeCommand().equals("/leaderboard")) { // /leaderboard [gameType]
             if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
-                gui.write(command.getParameter("leaderboard").toString());
+                gui.write(commandUtil.getParameter(command, "leaderboard", List.class).toString());
             }
 
         }
@@ -172,5 +175,19 @@ public class SocketClient implements Client {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public class SocketReader implements Runnable {
+
+        @Override
+        public void run() {
+            while (!isStopped()) {
+                try {
+                    processCommand(receiveResponse());
+                } catch (ClientIsStoppedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }
