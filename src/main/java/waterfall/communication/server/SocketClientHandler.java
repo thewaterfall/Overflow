@@ -150,7 +150,7 @@ public class SocketClientHandler implements ClientHandler {
     }
 
     private void processLeaderboard(Command command) {
-        GameType gameType = gameTypeService.findByName(command.getAttributesCommand().get(1));
+        GameType gameType = gameTypeService.findByName(command.getAttributesCommand().get(0));
         if (gameType != null) {
             command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
             command.addParameter("leaderboard", userService.getLeaderboard(gameType));
@@ -208,13 +208,13 @@ public class SocketClientHandler implements ClientHandler {
         if(!isInLobby()) {
             if(!currentLobby.isLobbyFull()) {
                 currentLobby = lobbyService.findById(Integer.valueOf(command.getAttributesCommand().get(1)));
-                currentLobby.setToVacantSlot(currentUser);
+                currentLobby.addUser(currentUser);
                 lobbyService.update(currentLobby);
 
                 currentPlayer = (Player) playerFactory.getBean(currentLobby.getGameType().getType());
                 currentLobby.getGame().registerPlayer(currentPlayer);
 
-                findOpponent();
+                findOpponentHandler();
                 command.setMessage("You have successfully connected");
             } else {
                 command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
@@ -230,13 +230,14 @@ public class SocketClientHandler implements ClientHandler {
         if(!isInLobby()) {
             command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
             currentLobby = new Lobby();
-            currentLobby.setToVacantSlot(currentUser);
-            lobbyService.save(currentLobby);
+            currentLobby.addUser(currentUser);
 
             currentLobby.setGame((Game) gameFactory.getBean(command.getAttributesCommand().get(1)));
+            currentLobby.setGameType(gameTypeService.findByName(command.getAttributesCommand().get(1)));
             currentPlayer = (Player) playerFactory.getBean(command.getAttributesCommand().get(1));
             currentLobby.getGame().registerPlayer(currentPlayer);
 
+            lobbyService.save(currentLobby);
             if(command.getAttributesCommand().get(2).equals("bot")) {
             // TODO add logic to play vs bot
             command.setMessage("The game has been started");
@@ -253,7 +254,7 @@ public class SocketClientHandler implements ClientHandler {
             currentUser = security.authorize(command.getAttributesCommand().get(0), command.getAttributesCommand().get(1));
             if (currentUser != null) {
                 command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
-                command.setMessage("Hello + " + command.getAttributesCommand().get(0));
+                command.setMessage("Hello " + command.getAttributesCommand().get(0));
                 command.addParameter("user", currentUser);
             } else {
                 command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
@@ -276,13 +277,10 @@ public class SocketClientHandler implements ClientHandler {
         }
     }
 
-    private boolean findOpponent() {
+    private boolean findOpponentHandler() {
         for(SocketClientHandler handler: clientHandlerList) {
-            if((handler.getCurrentUser().equals(currentLobby.getFirstUser()) ||
-                handler.getCurrentUser().equals(currentLobby.getSecondUser())
-                ) &&
-                !handler.getCurrentUser().equals(currentUser)
-            ) {
+            if (currentLobby.getUsers().contains(handler.getCurrentUser()) &&
+                    !handler.getCurrentUser().equals(currentUser)) {
                 opponent = handler;
                 handler.setOpponent(this);
                 return true;

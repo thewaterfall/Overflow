@@ -11,7 +11,7 @@ public class SecurityImpl implements Security {
 
     @Override
     public User authorize(String username, String password) {
-        User user = userService.findByUsername("username");
+        User user = userService.findByUsername(username);
 
         if(!user.getPassword().equals(password)) {
             user = null;
