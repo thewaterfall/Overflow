@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GameFactory implements Factory<Game> {
-    private Map<String, Class> beanStorage;
+    private static Map<String, Class> beanStorage = new HashMap<>();
 
     public GameFactory() {
-        this.beanStorage = new HashMap<>();
+        if (beanStorage == null) {
+            beanStorage = new HashMap<>();
+        }
     }
 
     public GameFactory(int storageSize) {

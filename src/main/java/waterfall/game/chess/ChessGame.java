@@ -44,9 +44,10 @@ public class ChessGame implements Game {
 
     @Override
     public boolean registerPlayer(Player player) {
+        boolean isAdded = playerList.add(player);
         player.setMark(getMark());
 
-        return playerList.add(player);
+        return isAdded;
     }
 
     @Override

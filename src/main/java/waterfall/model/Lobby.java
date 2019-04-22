@@ -26,7 +26,7 @@ public class Lobby {
     private Game game;
 
     public Lobby() {
-
+        this.users = new HashSet<>(2);
     }
 
     public Lobby(GameType gameType) {

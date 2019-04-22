@@ -207,7 +207,7 @@ public class SocketClientHandler implements ClientHandler {
     private void processConnect(Command command) {
         if(!isInLobby()) {
             if(!currentLobby.isLobbyFull()) {
-                currentLobby = lobbyService.findById(Integer.valueOf(command.getAttributesCommand().get(1)));
+                currentLobby = lobbyService.findById(Integer.valueOf(command.getAttributesCommand().get(0)));
                 currentLobby.addUser(currentUser);
                 lobbyService.update(currentLobby);
 
@@ -232,17 +232,17 @@ public class SocketClientHandler implements ClientHandler {
             currentLobby = new Lobby();
             currentLobby.addUser(currentUser);
 
-            currentLobby.setGame((Game) gameFactory.getBean(command.getAttributesCommand().get(1)));
-            currentLobby.setGameType(gameTypeService.findByName(command.getAttributesCommand().get(1)));
-            currentPlayer = (Player) playerFactory.getBean(command.getAttributesCommand().get(1));
+            currentLobby.setGame((Game) gameFactory.getBean(command.getAttributesCommand().get(0)));
+            currentLobby.setGameType(gameTypeService.findByName(command.getAttributesCommand().get(0)));
+            currentPlayer = (Player) playerFactory.getBean(command.getAttributesCommand().get(0));
             currentLobby.getGame().registerPlayer(currentPlayer);
 
             lobbyService.save(currentLobby);
-            if(command.getAttributesCommand().get(2).equals("bot")) {
+            if (command.getAttributesCommand().get(1).equals("bot")) {
             // TODO add logic to play vs bot
             command.setMessage("The game has been started");
             }
-            command.setMessage("Lobby has been created with id + " + currentLobby.getId());
+            command.setMessage("Lobby has been created with id: " + currentLobby.getId());
         } else {
             command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
             command.setMessage("You are already in lobby");

@@ -8,7 +8,9 @@ public class PlayerFactory implements Factory<Player>{
     private static Map<String, Class> beanStorage;
 
     public PlayerFactory() {
-        this.beanStorage = new HashMap<>();
+        if (beanStorage == null) {
+            beanStorage = new HashMap<>();
+        }
     }
 
     public PlayerFactory(int storageSize) {
