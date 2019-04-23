@@ -34,6 +34,10 @@ public class Tile {
         }
     }
 
+    public TileColor getTileColor() {
+        return color;
+    }
+
     public boolean isEmpty(){
         return piece == null;
     }
