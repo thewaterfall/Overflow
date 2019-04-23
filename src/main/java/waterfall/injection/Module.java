@@ -1,6 +1,11 @@
 package waterfall.injection;
 
 import com.google.inject.AbstractModule;
+import java.net.Socket;
+import waterfall.communication.client.Client;
+import waterfall.communication.client.SocketClient;
+import waterfall.communication.server.ClientHandler;
+import waterfall.communication.server.SocketClientHandler;
 import waterfall.dao.*;
 import waterfall.protocol.CommandUtil;
 import waterfall.protocol.JSONCommandUtil;
@@ -24,5 +29,8 @@ public class Module extends AbstractModule {
         bind(Security.class).to(SecurityImpl.class);
 
         bind(CommandUtil.class).to(JSONCommandUtil.class);
+
+        bind(Client.class).to(SocketClient.class);
+        bind(ClientHandler.class).to(SocketClientHandler.class);
     }
 }
