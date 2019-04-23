@@ -1,8 +1,9 @@
 package waterfall.gui;
 
+import static org.fusesource.jansi.Ansi.ansi;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import waterfall.communication.client.SocketClient;
+import waterfall.communication.client.Client;
 import waterfall.exception.ClientIsStoppedException;
 import waterfall.game.Board;
 import waterfall.injection.Module;
@@ -10,7 +11,7 @@ import waterfall.injection.Module;
 import java.util.Scanner;
 
 public class ConsoleGUI implements GUI {
-    private SocketClient socketClient;
+    private Client client;
     private Board board;
     private Injector injector;
 
@@ -19,11 +20,8 @@ public class ConsoleGUI implements GUI {
     public ConsoleGUI(String iphost, int port) {
         this.injector = Guice.createInjector(new Module());
 
-        this.socketClient = injector.getInstance(SocketClient.class);
-        this.socketClient.setGui(this);
-        this.socketClient.setIphost(iphost);
-        this.socketClient.setPort(port);
-
+        this.client = injector.getInstance(Client.class);
+        this.client.configure(iphost, port, this);
 
         this.scanner = new Scanner(System.in);
     }
@@ -48,25 +46,26 @@ public class ConsoleGUI implements GUI {
         this.board = board;
     }
 
-    public SocketClient getSocketClient() {
-        return this.socketClient;
+    public Client getClient() {
+        return this.client;
     }
 
     public static void main(String[] args) {
         ConsoleGUI gui = new ConsoleGUI("localhost", 8088);
 
 
-        gui.getSocketClient().startConnection();
+        gui.getClient().startConnection();
 
-        while (!gui.getSocketClient().isStopped()) {
+        while (!gui.getClient().isStopped()) {
             String getText = gui.read();
 
             try {
-                gui.getSocketClient().communicate(getText);
+                gui.getClient().communicate(getText);
             } catch (ClientIsStoppedException e) {
                 e.printStackTrace();
                 gui.write(e.getMessage());
             }
         }
+
     }
 }

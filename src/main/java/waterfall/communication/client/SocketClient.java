@@ -43,6 +43,13 @@ public class SocketClient implements Client {
     }
 
     @Override
+    public void configure(String iphost, int port, GUI gui) {
+        this.iphost = iphost;
+        this.port = port;
+        this.gui = gui;
+    }
+
+    @Override
     public void startConnection() {
         try {
             socket = new Socket(iphost, port);
@@ -133,11 +140,17 @@ public class SocketClient implements Client {
         } else if (command.getTypeCommand().equals("/connect")) {  // /connect [lobbyId]
 
         } else if (command.getTypeCommand().equals("/broadcast")) {
-
-        } else if (command.getTypeCommand().equals("/move")) {  // /move [from] [to]
             board = commandUtil.getParameter(command, "board", Board.class);
-            gui.updateBoard(board);
-            gui.update();
+            if(board != null) {
+                gui.updateBoard(board);
+                gui.update();
+            }
+        } else if (command.getTypeCommand().equals("/move")) {  // /move [from] [to]
+            if(command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
+                board = commandUtil.getParameter(command, "board", Board.class);
+                gui.updateBoard(board);
+                gui.update();
+            }
         } else if (command.getTypeCommand().equals("/leaderboard")) { // /leaderboard [gameType]
             if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
                 gui.write(commandUtil.getParameter(command, "leaderboard", List.class).toString());
@@ -149,6 +162,7 @@ public class SocketClient implements Client {
         gui.write(command.getMessage());
     }
 
+    @Override
     public boolean isStopped() {
         return isStopped;
     }
