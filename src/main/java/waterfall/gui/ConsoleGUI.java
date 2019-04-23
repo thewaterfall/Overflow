@@ -1,6 +1,5 @@
 package waterfall.gui;
 
-import static org.fusesource.jansi.Ansi.ansi;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import waterfall.communication.client.Client;
