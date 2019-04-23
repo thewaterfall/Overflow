@@ -163,9 +163,14 @@ public class SocketClientHandler implements ClientHandler {
 
     private void processMove(Command command) {
         String response = currentPlayer.makeMove(currentLobby.getGame(), currentLobby.getGame().convertToMove(
-                command.getAttributesCommand().get(1) + " " + command.getAttributesCommand().get(2)));
+                command.getAttributesCommand().get(0) + " " + command.getAttributesCommand().get(1)));
 
+        if(command.getMessage().startsWith("Moved from")) {
+            command.addParameter("board", currentLobby.getGame().getBoard());
+            command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
+        }
         command.setMessage(response);
+
         if(currentLobby.getGame().isFinished()) {
             if(!currentUser.hasGameStat(currentLobby.getGameType())) {
                 GameStat gameStat = new GameStat(currentLobby.getGameType(), 0, 0, 0);
@@ -188,19 +193,18 @@ public class SocketClientHandler implements ClientHandler {
                 currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()).addLose();
 
                 gameStatService.update(currentUser.getGameStat(currentLobby.getGameType()));
-                command.setMessage(currentUser.getUsername() + " has won.");
+                command.setMessage(command.getMessage() +  currentUser.getUsername() + " has won.");
             } else {
                 currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()).addWin();
                 currentUser.getGameStat(currentLobby.getGameType()).addLose();
 
                 gameStatService.update(currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()));
-                command.setMessage(currentLobby.getOpponentFor(currentUser).getUsername() + " has won.");
+                command.setMessage(command.getMessage() +  currentLobby.getOpponentFor(currentUser).getUsername() + " has won.");
             }
 
             lobbyService.remove(currentLobby);
         }
 
-        command.addParameter("board", currentLobby.getGame().getBoard());
         broadCast(command);
     }
 
@@ -307,6 +311,7 @@ public class SocketClientHandler implements ClientHandler {
             broadcastCommand = commandUtil.constructCommand("/broadcast",
                     CommandConstants.COMMAND_TYPE_RESPONSE, CommandConstants.COMMAND_TYPE_HANDLER,
                     CommandConstants.COMMAND_STATUS_SUCCESS);
+            broadcastCommand.addParameter("board", currentLobby.getGame().getBoard());
         } catch (IllegalCommandException e) {
             e.printStackTrace();
         }
