@@ -140,7 +140,7 @@ public class SocketClient implements Client {
 
         } else if (command.getTypeCommand().equals("/connect")) {  // /connect [lobbyId]
 
-        } else if (command.getTypeCommand().equals("/broadcast")) {
+        } else if (command.getTypeCommand().equals("/message")) {
             board = commandUtil.getParameter(command, "board", ChessBoard.class);
             if(board != null) {
                 gui.updateBoard(board);

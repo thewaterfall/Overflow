@@ -119,6 +119,8 @@ public class SocketClientHandler implements ClientHandler {
 
     @Override
     public Command processCommand(Command command) {
+        verifyAuth(command);
+
         command.setSource(CommandConstants.COMMAND_TYPE_HANDLER);
         command.setType(CommandConstants.COMMAND_TYPE_RESPONSE);
 
@@ -150,7 +152,7 @@ public class SocketClientHandler implements ClientHandler {
     private void broadCast(Command command, boolean isEveryone) {
         String typeCommand = command.getTypeCommand();
 
-        command.setTypeCommand("/broadcast");
+        command.setTypeCommand("/message");
         if(currentLobby.isLobbyFull()) {
             if (isEveryone) {
                 opponent.sendResponse(command);
@@ -350,28 +352,30 @@ public class SocketClientHandler implements ClientHandler {
         broadCast(broadcastCommand, true);
     }
 
-    public void onConnect() {
-        while(currentUser == null) {
-            loginForm();
+    private void verifyAuth(Command command) {
+        if(!isLoggedIn()) {
+            command = constuctLogin();
         }
     }
 
-    public void loginForm() {
+    private Command constuctLogin() {
         String loginMessage = "Type /login [username] [password] to log in.";
 
         Command command = null;
         try {
-            command = commandUtil.constructCommand("/login", CommandConstants.COMMAND_TYPE_RESPONSE,
+            command = commandUtil.constructCommand("/message", CommandConstants.COMMAND_TYPE_RESPONSE,
                     CommandConstants.COMMAND_TYPE_HANDLER, CommandConstants.COMMAND_STATUS_SUCCESS);
             command.setMessage(loginMessage);
         } catch (IllegalCommandException e) {
             e.printStackTrace();
         }
 
-        sendResponse(command);
-        Command request = receiveRequest();
-        Command response = processCommand(request);
-        sendResponse(response);
+        return command;
+    }
+
+    private void onConnect() {
+        Command loginCommand = constuctLogin();
+        sendResponse(loginCommand);
     }
 
     public User getCurrentUser() {
