@@ -3,9 +3,10 @@ package waterfall.dao;
 import org.hibernate.query.Query;
 import waterfall.util.HibernateUtil;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class AbstractDAO<PK, T> {
+public class AbstractDAO<PK extends Serializable, T> {
 
     private Class<T> entityClass;
 
@@ -31,7 +32,7 @@ public class AbstractDAO<PK, T> {
         HibernateUtil.closeSessionWithTransaction();
     }
 
-    public T findById(Integer id) {
+    public T findById(PK id) {
         HibernateUtil.openSessionWithTransaction();
         T entity = HibernateUtil.getCurrentSession().get(entityClass, id);
         HibernateUtil.closeSessionWithTransaction();
