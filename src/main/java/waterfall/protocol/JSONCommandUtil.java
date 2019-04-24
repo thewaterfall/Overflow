@@ -1,6 +1,7 @@
 package waterfall.protocol;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import waterfall.exception.IllegalCommandException;
 
@@ -11,6 +12,7 @@ public class JSONCommandUtil implements CommandUtil {
 
     public JSONCommandUtil() {
         objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Override
