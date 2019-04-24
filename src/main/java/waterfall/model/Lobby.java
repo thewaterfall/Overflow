@@ -75,7 +75,7 @@ public class Lobby {
     }
 
     public boolean addUser(User user) {
-        if (users.size() == 2) {
+        if (users.size() < 2) {
             return users.add(user);
         }
 
