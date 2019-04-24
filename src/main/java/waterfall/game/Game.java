@@ -12,4 +12,6 @@ public interface Game {
     public Player getWinner();
 
     public boolean isFinished();
+
+    public void start();
 }
