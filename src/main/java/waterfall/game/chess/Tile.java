@@ -3,10 +3,14 @@ package waterfall.game.chess;
 public class Tile {
 
     private ChessPiece piece;
-    private final TileColor color;
+    private TileColor color;
 
     public enum TileColor{
         White, Black
+    }
+
+    public Tile() {
+
     }
 
     public Tile(TileColor color){

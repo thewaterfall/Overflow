@@ -1,12 +1,16 @@
 package waterfall.game.chess;
 
-public abstract class ChessPiece {
-    private final PieceType type;
-    private final PieceColor color;
-    private final MoveRule[] moveRules;
-    private final String name;
-    private final char charValue;
-    private final boolean repeatableMoves;
+public class ChessPiece {
+    private PieceType type;
+    private PieceColor color;
+    private MoveRule[] moveRules;
+    private String name;
+    private char charValue;
+    private boolean repeatableMoves;
+
+    public ChessPiece() {
+
+    }
 
     protected ChessPiece(PieceType type, PieceColor color, MoveRule[] moveRules, boolean repeatableMoves){
         this.type = type;

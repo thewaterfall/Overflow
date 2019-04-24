@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ChessGame implements Game {
 
-    private final ChessBoard board;
+    private ChessBoard board;
     private boolean isFinished;
     private PieceColor currentPlayer;
     private Player player;
@@ -17,10 +17,7 @@ public class ChessGame implements Game {
     private List<Player> playerList;
 
     public ChessGame() {
-        board = new ChessBoard();
-        currentPlayer = PieceColor.White;
         playerList = new ArrayList<Player>(2);
-        isFinished = false;
     }
 
     /**
@@ -30,7 +27,7 @@ public class ChessGame implements Game {
     public String playMove(Move move, Player player) {
         String message = isValidMove(move.getStart(), move.getDestination(), player, false);
 
-        Tile fromTile = (Tile) board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
+        Tile fromTile = (Tile) board.getBoardArray()[move.getStart().getY()][move.getStart().getX()];
         ChessPiece pieceToMove = fromTile.getPiece();
 
         Tile toTile = (Tile) board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
@@ -40,6 +37,14 @@ public class ChessGame implements Game {
         endTurn();
 
         return message;
+    }
+
+    @Override
+    public void start() {
+        this.player = playerList.get(0);
+        board = new ChessBoard();
+        currentPlayer = PieceColor.White;
+        isFinished = false;
     }
 
     @Override
@@ -69,8 +74,8 @@ public class ChessGame implements Game {
             }
         }
 
-        return new Move(new Coordinates(firstCoord, Integer.valueOf(coordinates[0].charAt(1))),
-                new Coordinates(secondCoord, Integer.valueOf(coordinates[1].charAt(1))));
+        return new Move(new Coordinates(Character.getNumericValue(coordinates[0].charAt(1)), firstCoord),
+                new Coordinates(Character.getNumericValue(coordinates[1].charAt(1)), secondCoord));
     }
 
     /**
