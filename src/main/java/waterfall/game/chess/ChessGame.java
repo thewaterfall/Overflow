@@ -26,15 +26,18 @@ public class ChessGame implements Game {
     @Override
     public String playMove(Move move, Player player) {
         String message = isValidMove(move.getStart(), move.getDestination(), player, false);
+        if(message.equals("Valid move")) {
+            Tile fromTile = (Tile) board.getBoardArray()[move.getStart().getY()][move.getStart().getX()];
+            ChessPiece pieceToMove = fromTile.getPiece();
 
-        Tile fromTile = (Tile) board.getBoardArray()[move.getStart().getY()][move.getStart().getX()];
-        ChessPiece pieceToMove = fromTile.getPiece();
+            Tile toTile = (Tile) board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
+            toTile.setPiece(pieceToMove);
 
-        Tile toTile = (Tile) board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
-        toTile.setPiece(pieceToMove);
+            fromTile.empty();
+            endTurn();
 
-        fromTile.empty();
-        endTurn();
+            message = "Moved from " + move.getStart() + " to" + move.getDestination();
+        }
 
         return message;
     }
@@ -231,7 +234,7 @@ public class ChessGame implements Game {
             toTile.setPiece(toPiece);
             fromTile.setPiece(fromPiece);
 
-            return "Moved from " + from + " to " + to;
+            return "Valid move";
         }
         return "Invalid move";
     }
