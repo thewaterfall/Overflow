@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import waterfall.exception.ClientIsStoppedException;
 import waterfall.exception.IllegalCommandException;
 import waterfall.game.Board;
+import waterfall.game.chess.ChessBoard;
 import waterfall.gui.GUI;
 import waterfall.model.User;
 import waterfall.protocol.Command;
@@ -140,14 +141,14 @@ public class SocketClient implements Client {
         } else if (command.getTypeCommand().equals("/connect")) {  // /connect [lobbyId]
 
         } else if (command.getTypeCommand().equals("/broadcast")) {
-            board = commandUtil.getParameter(command, "board", Board.class);
+            board = commandUtil.getParameter(command, "board", ChessBoard.class);
             if(board != null) {
                 gui.updateBoard(board);
                 gui.update();
             }
         } else if (command.getTypeCommand().equals("/move")) {  // /move [from] [to]
             if(command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
-                board = commandUtil.getParameter(command, "board", Board.class);
+                board = commandUtil.getParameter(command, "board", ChessBoard.class);
                 gui.updateBoard(board);
                 gui.update();
             }
@@ -157,7 +158,6 @@ public class SocketClient implements Client {
             }
 
         }
-
 
         gui.write(command.getMessage());
     }

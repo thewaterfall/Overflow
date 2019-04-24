@@ -142,11 +142,25 @@ public class SocketClientHandler implements ClientHandler {
         return command;
     }
 
-    private void broadCast(Command command) {
+    @Override
+    public Game getCurrentGame() {
+        return currentLobby.getGame();
+    }
+
+    private void broadCast(Command command, boolean isEveryone) {
+        String typeCommand = command.getTypeCommand();
+
+        command.setTypeCommand("/broadcast");
         if(currentLobby.isLobbyFull()) {
-            sendResponse(command);
-            opponent.sendResponse(command);
+            if (isEveryone) {
+                opponent.sendResponse(command);
+                sendResponse(command);
+            } else {
+                opponent.sendResponse(command);
+            }
         }
+
+        command.setTypeCommand(typeCommand);
     }
 
     private void processLeaderboard(Command command) {
@@ -162,12 +176,20 @@ public class SocketClientHandler implements ClientHandler {
     }
 
     private void processMove(Command command) {
+        if (!currentLobby.isLobbyFull()) {
+            Game game = currentLobby.getGame();
+            currentLobby = lobbyService.findById(currentLobby.getId());
+            currentLobby.setGame(game);
+        }
+
         String response = currentPlayer.makeMove(currentLobby.getGame(), currentLobby.getGame().convertToMove(
                 command.getAttributesCommand().get(0) + " " + command.getAttributesCommand().get(1)));
 
-        if(command.getMessage().startsWith("Moved from")) {
+        if (response.startsWith("Moved from")) {
             command.addParameter("board", currentLobby.getGame().getBoard());
             command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
+        } else {
+            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
         }
         command.setMessage(response);
 
@@ -205,21 +227,29 @@ public class SocketClientHandler implements ClientHandler {
             lobbyService.remove(currentLobby);
         }
 
-        broadCast(command);
+        if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS))
+            broadCast(command, false);
     }
 
     private void processConnect(Command command) {
         if(!isInLobby()) {
-            if(!currentLobby.isLobbyFull()) {
-                currentLobby = lobbyService.findById(Integer.valueOf(command.getAttributesCommand().get(0)));
+            Lobby lobby = lobbyService.findById(Integer.valueOf(command.getAttributesCommand().get(0)));
+            if (!lobby.isLobbyFull()) {
+                currentLobby = lobby;
                 currentLobby.addUser(currentUser);
                 lobbyService.update(currentLobby);
 
                 currentPlayer = (Player) playerFactory.getBean(currentLobby.getGameType().getType());
-                currentLobby.getGame().registerPlayer(currentPlayer);
 
                 findOpponentHandler();
+
+                currentLobby.setGame(opponent.getCurrentGame());
+                currentLobby.getGame().registerPlayer(currentPlayer);
+
+                currentLobby.getGame().start();
+
                 command.setMessage("You have successfully connected");
+                command.addParameter("board", currentLobby.getGame().getBoard());
             } else {
                 command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
                 command.setMessage("Lobby is full");
@@ -243,8 +273,8 @@ public class SocketClientHandler implements ClientHandler {
 
             lobbyService.save(currentLobby);
             if (command.getAttributesCommand().get(1).equals("bot")) {
-            // TODO add logic to play vs bot
-            command.setMessage("The game has been started");
+                // TODO add logic to play vs bot
+                command.setMessage("The game has been started");
             }
             command.setMessage("Lobby has been created with id: " + currentLobby.getId());
         } else {
@@ -312,11 +342,12 @@ public class SocketClientHandler implements ClientHandler {
                     CommandConstants.COMMAND_TYPE_RESPONSE, CommandConstants.COMMAND_TYPE_HANDLER,
                     CommandConstants.COMMAND_STATUS_SUCCESS);
             broadcastCommand.addParameter("board", currentLobby.getGame().getBoard());
+            broadcastCommand.setMessage("Game is ready!");
         } catch (IllegalCommandException e) {
             e.printStackTrace();
         }
 
-        broadCast(broadcastCommand);
+        broadCast(broadcastCommand, true);
     }
 
     public void onConnect() {
