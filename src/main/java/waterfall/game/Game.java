@@ -5,6 +5,8 @@ public interface Game {
 
     public boolean registerPlayer(Player player);
 
+    public boolean unregisterPlayer(Player player);
+
     public Move convertToMove(String coordsMove);
 
     public Board getBoard();
@@ -12,6 +14,8 @@ public interface Game {
     public Player getWinner();
 
     public boolean isFinished();
+
+    public boolean isReady();
 
     public void start();
 }

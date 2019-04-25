@@ -57,6 +57,10 @@ public class ChessGame implements Game {
 
         return isAdded;
     }
+    @Override
+    public boolean unregisterPlayer(Player player) {
+        return playerList.remove(player);
+    }
 
     @Override
     public Move convertToMove(String coordsMove) {
@@ -100,6 +104,10 @@ public class ChessGame implements Game {
     @Override
     public boolean isFinished() {
         return isFinished;
+    }
+    @Override
+    public boolean isReady() {
+        return playerList.size() == 2;
     }
 
     public Player getOpponent(Player player) {
