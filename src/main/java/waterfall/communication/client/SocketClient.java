@@ -156,6 +156,7 @@ public class SocketClient implements Client {
             if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
                 gui.write(commandUtil.getParameter(command, "leaderboard", List.class).toString());
             }
+        } else if(command.getTypeCommand().equals("/disconnect")) {
 
         }
 

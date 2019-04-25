@@ -139,6 +139,8 @@ public class SocketClientHandler implements ClientHandler {
             processMove(command);
         } else if (command.getTypeCommand().equals("/leaderboard")) { // /leaderboard [gameType]
             processLeaderboard(command);
+        } else if (command.getTypeCommand().equals("/disconnect")) { // /disconnect
+            processDisconnect(command);
         }
 
         return command;
@@ -165,6 +167,23 @@ public class SocketClientHandler implements ClientHandler {
         command.setTypeCommand(typeCommand);
     }
 
+    private void processDisconnect(Command command) {
+        if(isInLobby()) {
+            currentLobby.removeUser(currentUser);
+            currentLobby.getGame().unregisterPlayer(currentPlayer);
+            lobbyService.update(currentLobby);
+
+            currentLobby = null;
+            currentPlayer = null;
+
+            command.setMessage(currentUser.getUsername() + " has disconnected");
+            broadCast(command, false);
+        } else {
+            command.setMessage("There's no lobby to disconnect from");
+            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
+        }
+    }
+
     private void processLeaderboard(Command command) {
         GameType gameType = gameTypeService.findByName(command.getAttributesCommand().get(0));
         if (gameType != null) {
@@ -184,8 +203,13 @@ public class SocketClientHandler implements ClientHandler {
             currentLobby.setGame(game);
         }
 
-        String response = currentPlayer.makeMove(currentLobby.getGame(), currentLobby.getGame().convertToMove(
-                command.getAttributesCommand().get(0) + " " + command.getAttributesCommand().get(1)));
+        String response = "";
+        if(currentLobby.getGame().isReady()) {
+            response = currentPlayer.makeMove(currentLobby.getGame(), currentLobby.getGame().convertToMove(
+                    command.getAttributesCommand().get(0) + " " + command.getAttributesCommand().get(1)));
+        } else {
+            command.setMessage("Game is not ready");
+        }
 
         if (response.startsWith("Moved from")) {
             command.addParameter("board", currentLobby.getGame().getBoard());
@@ -247,8 +271,6 @@ public class SocketClientHandler implements ClientHandler {
 
                 currentLobby.setGame(opponent.getCurrentGame());
                 currentLobby.getGame().registerPlayer(currentPlayer);
-
-                currentLobby.getGame().start();
 
                 command.setMessage("You have successfully connected");
                 command.addParameter("board", currentLobby.getGame().getBoard());
@@ -338,9 +360,11 @@ public class SocketClientHandler implements ClientHandler {
     }
 
     private void onGameReady() {
+        currentLobby.getGame().start();
+
         Command broadcastCommand = null;
         try {
-            broadcastCommand = commandUtil.constructCommand("/broadcast",
+            broadcastCommand = commandUtil.constructCommand("/message",
                     CommandConstants.COMMAND_TYPE_RESPONSE, CommandConstants.COMMAND_TYPE_HANDLER,
                     CommandConstants.COMMAND_STATUS_SUCCESS);
             broadcastCommand.addParameter("board", currentLobby.getGame().getBoard());
