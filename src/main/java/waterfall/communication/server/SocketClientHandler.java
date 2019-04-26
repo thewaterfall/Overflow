@@ -178,6 +178,7 @@ public class SocketClientHandler implements ClientHandler {
 
             command.setMessage(currentUser.getUsername() + " has disconnected");
             broadCast(command, false);
+            ((SocketClientHandler) opponent).setOpponent(null);
             opponent = null;
         } else {
             command.setMessage("There's no lobby to disconnect from");
@@ -198,63 +199,69 @@ public class SocketClientHandler implements ClientHandler {
     }
 
     private void processMove(Command command) {
-        if (!currentLobby.isLobbyFull()) {
-            Game game = currentLobby.getGame();
-            currentLobby = lobbyService.findById(currentLobby.getId());
-            currentLobby.setGame(game);
-        }
+        if (isInLobby()) {
+            if (!currentLobby.isLobbyFull()) {
+                Game game = currentLobby.getGame();
+                currentLobby = lobbyService.findById(currentLobby.getId());
+                currentLobby.setGame(game);
+            }
 
-        if(currentLobby.getGame().isReady()) {
-            Move move = currentLobby.getGame().convertToMove(
-                    command.getAttributesCommand().get(0) + " " + command.getAttributesCommand().get(1));
-            command.setMessage(currentPlayer.makeMove(currentLobby.getGame(), move));
-        } else {
-            command.setMessage("Game is not ready");
-        }
+            if (currentLobby.getGame().isReady()) {
+                Move move = currentLobby.getGame().convertToMove(
+                        command.getAttributesCommand().get(0) + " " + command.getAttributesCommand().get(1));
+                command.setMessage(currentPlayer.makeMove(currentLobby.getGame(), move));
+            } else {
+                command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
+                command.setMessage("Game is not ready");
+            }
 
-        if (command.getMessage().startsWith("Moved from")) {
-            command.addParameter("board", currentLobby.getGame().getBoard());
-            command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
+            if (command.getMessage().startsWith("Moved from")) {
+                command.addParameter("board", currentLobby.getGame().getBoard());
+                command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
+            } else {
+                command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
+            }
+
+            if (currentLobby.getGame().isFinished()) {
+                if (!currentUser.hasGameStat(currentLobby.getGameType())) {
+                    GameStat gameStat = new GameStat(currentLobby.getGameType(), 0, 0, 0);
+                    gameStatService.save(gameStat);
+
+                    currentUser.addGameStat(gameStat);
+                    userService.update(currentUser);
+                }
+
+                if (!currentLobby.getOpponentFor(currentUser).hasGameStat(currentLobby.getGameType())) {
+                    GameStat gameStat = new GameStat(currentLobby.getGameType(), 0, 0, 0);
+                    gameStatService.save(gameStat);
+
+                    currentLobby.getOpponentFor(currentUser).addGameStat(gameStat);
+                    userService.update(currentLobby.getOpponentFor(currentUser));
+                }
+
+                if (currentLobby.getGame().getWinner() == currentPlayer) {
+                    currentUser.getGameStat(currentLobby.getGameType()).addWin();
+                    currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()).addLose();
+
+                    gameStatService.update(currentUser.getGameStat(currentLobby.getGameType()));
+                    command.setMessage(command.getMessage() + currentUser.getUsername() + " has won.");
+                } else {
+                    currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()).addWin();
+                    currentUser.getGameStat(currentLobby.getGameType()).addLose();
+
+                    gameStatService.update(currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()));
+                    command.setMessage(command.getMessage() + currentLobby.getOpponentFor(currentUser).getUsername() + " has won.");
+                }
+
+                lobbyService.remove(currentLobby);
+            }
+
+            if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS))
+                broadCast(command, false);
         } else {
             command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
+            command.setMessage("You are not in a game");
         }
-
-        if(currentLobby.getGame().isFinished()) {
-            if(!currentUser.hasGameStat(currentLobby.getGameType())) {
-                GameStat gameStat = new GameStat(currentLobby.getGameType(), 0, 0, 0);
-                gameStatService.save(gameStat);
-
-                currentUser.addGameStat(gameStat);
-                userService.update(currentUser);
-            }
-
-            if(!currentLobby.getOpponentFor(currentUser).hasGameStat(currentLobby.getGameType())) {
-                GameStat gameStat = new GameStat(currentLobby.getGameType(), 0, 0, 0);
-                gameStatService.save(gameStat);
-
-                currentLobby.getOpponentFor(currentUser).addGameStat(gameStat);
-                userService.update(currentLobby.getOpponentFor(currentUser));
-            }
-
-            if(currentLobby.getGame().getWinner() == currentPlayer) {
-                currentUser.getGameStat(currentLobby.getGameType()).addWin();
-                currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()).addLose();
-
-                gameStatService.update(currentUser.getGameStat(currentLobby.getGameType()));
-                command.setMessage(command.getMessage() +  currentUser.getUsername() + " has won.");
-            } else {
-                currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()).addWin();
-                currentUser.getGameStat(currentLobby.getGameType()).addLose();
-
-                gameStatService.update(currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()));
-                command.setMessage(command.getMessage() +  currentLobby.getOpponentFor(currentUser).getUsername() + " has won.");
-            }
-
-            lobbyService.remove(currentLobby);
-        }
-
-        if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS))
-            broadCast(command, false);
     }
 
     private void processConnect(Command command) {
