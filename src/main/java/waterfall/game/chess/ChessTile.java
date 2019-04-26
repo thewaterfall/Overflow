@@ -1,23 +1,26 @@
 package waterfall.game.chess;
 
-public class Tile {
+import waterfall.game.Color;
+import waterfall.game.Tile;
+
+public class ChessTile implements Tile {
 
     private ChessPiece piece;
-    private TileColor color;
+    private Color color;
 
-    public enum TileColor{
+    public enum TileColor {
         White, Black
     }
 
-    public Tile() {
+    public ChessTile() {
 
     }
 
-    public Tile(TileColor color){
+    public ChessTile(Color color){
         this.color = color;
     }
 
-    public Tile(TileColor color, ChessPiece piece){
+    public ChessTile(Color color, ChessPiece piece){
         this.color = color;
         this.piece = piece;
     }
@@ -38,7 +41,7 @@ public class Tile {
         }
     }
 
-    public TileColor getTileColor() {
+    public Color getColor() {
         return color;
     }
 

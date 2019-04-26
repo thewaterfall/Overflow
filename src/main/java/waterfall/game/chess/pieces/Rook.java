@@ -1,11 +1,12 @@
 package waterfall.game.chess.pieces;
 
+import waterfall.game.Color;
 import waterfall.game.chess.ChessPiece;
 import waterfall.game.chess.MoveRule;
 
 public class Rook extends ChessPiece {
 
-	public Rook(PieceColor color){
+	public Rook(Color color){
 		super(PieceType.Rook, color, validMoves(), true);
 	}
 

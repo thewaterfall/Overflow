@@ -1,7 +1,6 @@
 package waterfall.game.chess;
 
 import waterfall.game.*;
-import waterfall.game.chess.ChessPiece.PieceColor;
 import waterfall.game.chess.ChessPiece.PieceType;
 
 import java.util.ArrayList;
@@ -11,7 +10,7 @@ public class ChessGame implements Game {
 
     private ChessBoard board;
     private boolean isFinished;
-    private PieceColor currentPlayer;
+    private Color currentPlayer;
     private Player player;
     private Player playerWinner;
     private List<Player> playerList;
@@ -27,10 +26,10 @@ public class ChessGame implements Game {
     public String playMove(Move move, Player player) {
         String message = isValidMove(move.getStart(), move.getDestination(), player, false);
         if(message.equals("Valid move")) {
-            Tile fromTile = (Tile) board.getBoardArray()[move.getStart().getY()][move.getStart().getX()];
+            ChessTile fromTile = (ChessTile) board.getBoardArray()[move.getStart().getY()][move.getStart().getX()];
             ChessPiece pieceToMove = fromTile.getPiece();
 
-            Tile toTile = (Tile) board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
+            ChessTile toTile = (ChessTile) board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
             toTile.setPiece(pieceToMove);
 
             fromTile.empty();
@@ -46,7 +45,7 @@ public class ChessGame implements Game {
     public void start() {
         this.player = playerList.get(0);
         board = new ChessBoard();
-        currentPlayer = PieceColor.White;
+        currentPlayer = Color.White;
         isFinished = false;
     }
 
@@ -119,10 +118,10 @@ public class ChessGame implements Game {
     }
 
     public String getMark() {
-        if (getPlayer().equals(PieceColor.White.name())) {
-            return PieceColor.Black.name();
+        if (getPlayer().equals(Color.White.name())) {
+            return Color.Black.name();
         } else {
-            return PieceColor.White.name();
+            return Color.White.name();
         }
     }
 
@@ -135,26 +134,26 @@ public class ChessGame implements Game {
     }
 
     private void endTurn() {
-        currentPlayer = (currentPlayer == PieceColor.White)
-                ? PieceColor.Black
-                : PieceColor.White;
+        currentPlayer = (currentPlayer == Color.White)
+                ? Color.Black
+                : Color.White;
 
         player = getOpponent(player);
     }
 
     // Function that checks if any piece can prevent check for the given color
     // This includes whether the King can move out of check himself.
-    private boolean isCheckPreventable(PieceColor color) {
+    private boolean isCheckPreventable(Color color) {
         boolean canPreventCheck = false;
         Coordinates[] locations = board.getAllPiecesLocationForColor(color);
 
         for (Coordinates location : locations) {
-            Tile fromTile = board.getTileFromCoordinates(location);
+            ChessTile fromTile = board.getTileFromCoordinates(location);
             ChessPiece piece = fromTile.getPiece();
             Coordinates[] possibleMoves = validMovesForPiece(piece, location);
 
             for (Coordinates newLocation : possibleMoves) {
-                Tile toTile = board.getTileFromCoordinates(newLocation);
+                ChessTile toTile = board.getTileFromCoordinates(newLocation);
                 ChessPiece toPiece = toTile.getPiece();
 
                 //temporarily play the move to see if it makes us check
@@ -178,18 +177,18 @@ public class ChessGame implements Game {
         return canPreventCheck;
     }
 
-    private boolean isColorCheckMate(PieceColor color) {
+    private boolean isColorCheckMate(Color color) {
         if (!isKingCheck(color)) return false;//if not check, then we're not mate
         return !isCheckPreventable(color);
     }
 
-    private boolean isKingCheck(PieceColor kingColor) {
+    private boolean isKingCheck(Color kingColor) {
         Coordinates kingLocation = board.getKingLocation(kingColor);
         return canOpponentTakeLocation(kingLocation, kingColor);
     }
 
-    private boolean canOpponentTakeLocation(Coordinates location, PieceColor color) {
-        PieceColor opponentColor = ChessPiece.opponent(color);
+    private boolean canOpponentTakeLocation(Coordinates location, Color color) {
+        Color opponentColor = ChessPiece.opponent(color);
         Coordinates[] piecesLocation = board.getAllPiecesLocationForColor(opponentColor);
 
         for (Coordinates fromCoordinates : piecesLocation) {
@@ -210,8 +209,8 @@ public class ChessGame implements Game {
             return "Not your turn";
         }
 
-        Tile fromTile = board.getTileFromCoordinates(from);
-        Tile toTile = board.getTileFromCoordinates(to);
+        ChessTile fromTile = board.getTileFromCoordinates(from);
+        ChessTile toTile = board.getTileFromCoordinates(to);
         ChessPiece fromPiece = fromTile.getPiece();
         ChessPiece toPiece = toTile.getPiece();
 
@@ -272,7 +271,7 @@ public class ChessGame implements Game {
                 if (newX < 0 || newX > 7 || newY < 0 || newY > 7) break;
 
                 Coordinates toLocation = new Coordinates(newX, newY);
-                Tile tile = board.getTileFromCoordinates(toLocation);
+                ChessTile tile = board.getTileFromCoordinates(toLocation);
                 if (tile.isEmpty()) {
                     possibleMoves.add(toLocation);
                 } else {
@@ -327,7 +326,7 @@ public class ChessGame implements Game {
 
                     //if moveRule is generally valid - check if path is valid up till i
                     for (int j = 1; j <= i; j++) {
-                        Tile tile = board.getTileFromCoordinates(new Coordinates(from.getX() + moveRule.x * j, from.getY() + moveRule.y * j));
+                        ChessTile tile = board.getTileFromCoordinates(new Coordinates(from.getX() + moveRule.x * j, from.getY() + moveRule.y * j));
                         //if passing through non empty tile return false
                         if (j != i && !tile.isEmpty())
                             return false;
@@ -346,7 +345,7 @@ public class ChessGame implements Game {
     private boolean isValidMoveForPieceNonRepeatable(Coordinates from, Coordinates to) {
         ChessPiece fromPiece = board.getTileFromCoordinates(from).getPiece();
         MoveRule[] validMoveRules = fromPiece.getMoveRules();
-        Tile toTile = board.getTileFromCoordinates(to);
+        ChessTile toTile = board.getTileFromCoordinates(to);
 
         int xMove = to.getX() - from.getX();
         int yMove = to.getY() - from.getY();
@@ -372,12 +371,12 @@ public class ChessGame implements Game {
 
     // Determine wheter the Pawn at 'from' on 'board' has moved yet.
     public boolean isFirstMoveForPawn(Coordinates from, ChessBoard board) {
-        Tile tile = board.getTileFromCoordinates(from);
+        ChessTile tile = board.getTileFromCoordinates(from);
         if (tile.isEmpty() || tile.getPiece().getPieceType() != PieceType.Pawn) {
             return false;
         } else {
-            PieceColor color = tile.getPiece().getColor();
-            return (color == PieceColor.White)
+            Color color = tile.getPiece().getColor();
+            return (color == Color.White)
                     ? from.getY() == 6
                     : from.getY() == 1;
         }

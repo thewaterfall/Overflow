@@ -1,11 +1,12 @@
 package waterfall.game.chess.pieces;
 
+import waterfall.game.Color;
 import waterfall.game.chess.ChessPiece;
 import waterfall.game.chess.MoveRule;
 
 public class Bishop extends ChessPiece {
 
-	public Bishop(PieceColor color){
+	public Bishop(Color color){
 		super(PieceType.Bishop, color, validMoves(), true);
 	}
 

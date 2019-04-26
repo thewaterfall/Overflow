@@ -1,11 +1,12 @@
 package waterfall.game.chess.pieces;
 
+import waterfall.game.Color;
 import waterfall.game.chess.ChessPiece;
 import waterfall.game.chess.MoveRule;
 
 public class Knight extends ChessPiece{
 
-	public Knight(ChessPiece.PieceColor color){
+	public Knight(Color color){
 		super(PieceType.Knight, color, validMoves(), false);
 	}
 

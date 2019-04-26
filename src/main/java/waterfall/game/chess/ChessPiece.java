@@ -1,8 +1,11 @@
 package waterfall.game.chess;
 
-public class ChessPiece {
+import waterfall.game.Color;
+import waterfall.game.Piece;
+
+public class ChessPiece implements Piece {
     private PieceType type;
-    private PieceColor color;
+    private Color color;
     private MoveRule[] moveRules;
     private String name;
     private char charValue;
@@ -12,7 +15,7 @@ public class ChessPiece {
 
     }
 
-    protected ChessPiece(PieceType type, PieceColor color, MoveRule[] moveRules, boolean repeatableMoves){
+    protected ChessPiece(PieceType type, Color color, MoveRule[] moveRules, boolean repeatableMoves){
         this.type = type;
         this.color = color;
         this.moveRules = moveRules;
@@ -25,14 +28,11 @@ public class ChessPiece {
         Pawn, Rook, Knight, Bishop, Queen, King
     }
 
-    public enum PieceColor {
-        White, Black
-    }
     public MoveRule[] getMoveRules(){ return moveRules; }
 
     public String getName(){ return name; }
 
-    public PieceColor getColor(){ return color; }
+    public Color getColor(){ return color; }
 
     public char getCharValue(){ return charValue; }
 
@@ -40,8 +40,8 @@ public class ChessPiece {
 
     public PieceType getPieceType() {return type; }
 
-    public static PieceColor opponent(PieceColor color) {
-        return (color == PieceColor.Black) ? PieceColor.White : PieceColor.Black;
+    public static Color opponent(Color color) {
+        return (color == Color.Black) ? Color.White : Color.Black;
     }
 
 }
