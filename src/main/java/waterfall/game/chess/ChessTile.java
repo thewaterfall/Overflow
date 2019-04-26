@@ -5,7 +5,7 @@ public class Tile {
     private ChessPiece piece;
     private TileColor color;
 
-    public enum TileColor{
+    public enum TileColor {
         White, Black
     }
 
