@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import waterfall.exception.ClientIsStoppedException;
 import waterfall.exception.IllegalCommandException;
 import waterfall.game.Board;
-import waterfall.game.chess.ChessBoard;
 import waterfall.gui.GUI;
 import waterfall.model.User;
 import waterfall.protocol.Command;
@@ -18,6 +17,7 @@ import java.util.List;
 public class SocketClient implements Client {
     private GUI gui;
     private Board board;
+
 
     private boolean isStopped = true;
 
@@ -132,7 +132,7 @@ public class SocketClient implements Client {
         // /login [username] [password]
         if (command.getTypeCommand().equals("/login") &&
                 command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
-            user = commandUtil.getParameter(command, "user", User.class);
+            user = (User) command.getParameter("user");
         } else if (command.getTypeCommand().equals("/logout") &&
                 command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) { // /logout
             user = null;
@@ -141,20 +141,20 @@ public class SocketClient implements Client {
         } else if (command.getTypeCommand().equals("/connect")) {  // /connect [lobbyId]
 
         } else if (command.getTypeCommand().equals("/message")) {
-            board = commandUtil.getParameter(command, "board", ChessBoard.class);
+            board = (Board) command.getParameter("board");
             if(board != null) {
                 gui.updateBoard(board);
                 gui.update();
             }
         } else if (command.getTypeCommand().equals("/move")) {  // /move [from] [to]
             if(command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
-                board = commandUtil.getParameter(command, "board", ChessBoard.class);
+                board = (Board) command.getParameter("board");
                 gui.updateBoard(board);
                 gui.update();
             }
         } else if (command.getTypeCommand().equals("/leaderboard")) { // /leaderboard [gameType]
             if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
-                gui.write(commandUtil.getParameter(command, "leaderboard", List.class).toString());
+                gui.write(((List) command.getParameter("leaderboard")).toString());
             }
         } else if(command.getTypeCommand().equals("/disconnect")) {
 

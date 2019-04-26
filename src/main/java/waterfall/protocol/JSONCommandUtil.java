@@ -13,6 +13,8 @@ public class JSONCommandUtil implements CommandUtil {
     public JSONCommandUtil() {
         objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.enableDefaultTyping(
+                ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
     }
 
     @Override
@@ -48,10 +50,5 @@ public class JSONCommandUtil implements CommandUtil {
         command.setFullCommand(toConstruct);
 
         return command;
-    }
-
-    @Override
-    public <V> V getParameter(Command command, String name, Class<V> classType) {
-        return objectMapper.convertValue(command.getParameter(name), classType);
     }
 }

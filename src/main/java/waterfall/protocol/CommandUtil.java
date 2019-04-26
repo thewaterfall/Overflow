@@ -8,6 +8,4 @@ public interface CommandUtil {
     public String covertToString(Command command);
 
     public Command constructCommand(String toConstruct, String commandType, String from, String status) throws IllegalCommandException;
-
-    public <V> V getParameter(Command command, String name, Class<V> classType);
 }
