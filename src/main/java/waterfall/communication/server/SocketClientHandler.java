@@ -119,7 +119,7 @@ public class SocketClientHandler implements ClientHandler {
 
     @Override
     public Command processCommand(Command command) {
-        verifyAuth(command);
+        command = verifyAuth(command);
 
         command.setSource(CommandConstants.COMMAND_TYPE_HANDLER);
         command.setType(CommandConstants.COMMAND_TYPE_RESPONSE);
@@ -155,7 +155,7 @@ public class SocketClientHandler implements ClientHandler {
         String typeCommand = command.getTypeCommand();
 
         command.setTypeCommand("/message");
-        if(currentLobby.isLobbyFull()) {
+        if (opponent != null) {
             if (isEveryone) {
                 opponent.sendResponse(command);
                 sendResponse(command);
@@ -178,6 +178,7 @@ public class SocketClientHandler implements ClientHandler {
 
             command.setMessage(currentUser.getUsername() + " has disconnected");
             broadCast(command, false);
+            opponent = null;
         } else {
             command.setMessage("There's no lobby to disconnect from");
             command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
@@ -203,21 +204,20 @@ public class SocketClientHandler implements ClientHandler {
             currentLobby.setGame(game);
         }
 
-        String response = "";
         if(currentLobby.getGame().isReady()) {
-            response = currentPlayer.makeMove(currentLobby.getGame(), currentLobby.getGame().convertToMove(
-                    command.getAttributesCommand().get(0) + " " + command.getAttributesCommand().get(1)));
+            Move move = currentLobby.getGame().convertToMove(
+                    command.getAttributesCommand().get(0) + " " + command.getAttributesCommand().get(1));
+            command.setMessage(currentPlayer.makeMove(currentLobby.getGame(), move));
         } else {
             command.setMessage("Game is not ready");
         }
 
-        if (response.startsWith("Moved from")) {
+        if (command.getMessage().startsWith("Moved from")) {
             command.addParameter("board", currentLobby.getGame().getBoard());
             command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
         } else {
             command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
         }
-        command.setMessage(response);
 
         if(currentLobby.getGame().isFinished()) {
             if(!currentUser.hasGameStat(currentLobby.getGameType())) {
@@ -376,10 +376,12 @@ public class SocketClientHandler implements ClientHandler {
         broadCast(broadcastCommand, true);
     }
 
-    private void verifyAuth(Command command) {
-        if(!isLoggedIn()) {
+    private Command verifyAuth(Command command) {
+        if (!isLoggedIn() && !command.getTypeCommand().equals("/login")) {
             command = constuctLogin();
         }
+
+        return command;
     }
 
     private Command constuctLogin() {
