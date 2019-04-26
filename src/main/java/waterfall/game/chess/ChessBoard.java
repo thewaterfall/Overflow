@@ -20,7 +20,7 @@ public class ChessBoard implements Board {
     }
 
     @Override
-    public Object[][] getBoardArray() {
+    public ChessTile[][] getBoardArray() {
         return boardArray;
     }
 

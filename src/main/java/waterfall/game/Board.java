@@ -1,5 +1,5 @@
 package waterfall.game;
 
 public interface Board {
-    public Object[][] getBoardArray();
+    public Tile[][] getBoardArray();
 }
