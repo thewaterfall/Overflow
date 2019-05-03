@@ -4,7 +4,8 @@ import waterfall.game.Color;
 import waterfall.game.chess.ChessPiece;
 import waterfall.game.chess.MoveRule;
 
-public class King extends ChessPiece{
+public class King extends ChessPiece {
+	private final static float cost = Float.MAX_VALUE;
 
 	public King(Color color){
 		super(PieceType.King, color, validMoves(), false);
@@ -15,5 +16,10 @@ public class King extends ChessPiece{
                         	new MoveRule(-1, 0, false, false), new MoveRule(0, -1, false, false),
                         	new MoveRule(1, 1, false, false), new MoveRule(1, -1, false, false),
                         	new MoveRule(-1, 1, false, false), new MoveRule(-1, -1, false, false)};
+	}
+
+	@Override
+	public float getCost() {
+		return cost;
 	}
 }

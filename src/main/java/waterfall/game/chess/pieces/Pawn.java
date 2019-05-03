@@ -5,6 +5,7 @@ import waterfall.game.chess.ChessPiece;
 import waterfall.game.chess.MoveRule;
 
 public class Pawn extends ChessPiece {
+    private final static float cost = 1;
 
 	public Pawn(Color color){
 		super(PieceType.Pawn, color, validMoves(color), false);
@@ -19,4 +20,9 @@ public class Pawn extends ChessPiece {
                               new MoveRule(1, -1, false, true), new MoveRule(-1, -1, false, true)};
         }
 	}
+
+    @Override
+    public float getCost() {
+        return cost;
+    }
 }
