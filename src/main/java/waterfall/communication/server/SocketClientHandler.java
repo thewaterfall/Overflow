@@ -305,6 +305,7 @@ public class SocketClientHandler implements ClientHandler {
             lobbyService.save(currentLobby);
             if (command.getAttributesCommand().get(1).equals("bot")) {
                 // TODO add logic to play vs bot
+                currentLobby.getGame().registerPlayer((Player) playerFactory.getBean("ai" + command.getAttributesCommand().get(0)));
                 command.setMessage("The game has been started");
             }
             command.setMessage("Lobby has been created with id: " + currentLobby.getId());

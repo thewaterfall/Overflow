@@ -7,6 +7,7 @@ import waterfall.game.GameFactory;
 import waterfall.game.PlayerFactory;
 import waterfall.game.UserPlayer;
 import waterfall.game.chess.ChessGame;
+import waterfall.game.chess.pieces.AIChessPlayer;
 import waterfall.injection.Module;
 
 import java.io.IOException;
@@ -40,6 +41,7 @@ public class SocketServer implements Server {
 
         this.playerFactory = new PlayerFactory();
         this.playerFactory.register("chess", UserPlayer.class);
+        this.playerFactory.register("aichess", AIChessPlayer.class);
     }
 
     @Override

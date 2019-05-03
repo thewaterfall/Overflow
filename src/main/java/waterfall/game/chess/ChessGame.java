@@ -2,6 +2,7 @@ package waterfall.game.chess;
 
 import waterfall.game.*;
 import waterfall.game.chess.ChessPiece.PieceType;
+import waterfall.game.chess.pieces.King;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +27,7 @@ public class ChessGame implements Game {
     public String playMove(Move move, Player player) {
         String message = isValidMove(move.getStart(), move.getDestination(), player, false);
         if(message.equals("Valid move")) {
-            ChessTile fromTile = (ChessTile) board.getBoardArray()[move.getStart().getY()][move.getStart().getX()];
-            ChessPiece pieceToMove = fromTile.getPiece();
-
-            ChessTile toTile = (ChessTile) board.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
-            toTile.setPiece(pieceToMove);
-
-            fromTile.empty();
+            applyMove(move, this.board);
             endTurn();
 
             message = "Moved from " + move.getStart() + " to" + move.getDestination();
@@ -204,7 +199,7 @@ public class ChessGame implements Game {
      * @param hypothetical if the move is hypothetical, we disregard if it sets the from player check
      * @return a boolean indicating whether the move is valid or not
      */
-    private String isValidMove(Coordinates from, Coordinates to, Player player, boolean hypothetical) {
+    public String isValidMove(Coordinates from, Coordinates to, Player player, boolean hypothetical) {
         if (player != this.player && player != null) {
             return "Not your turn";
         }
@@ -222,7 +217,7 @@ public class ChessGame implements Game {
             return "The tile is blocked with your piece";
         } else if (isValidMoveForPiece(from, to)) {
             //if hypothetical and valid, return true
-            if (hypothetical) return "hypothetical";
+            if (hypothetical) return "Valid move";
 
             //temporarily play the move to see if it makes us check
             toTile.setPiece(fromPiece);
@@ -244,6 +239,127 @@ public class ChessGame implements Game {
             return "Valid move";
         }
         return "Invalid move";
+    }
+
+    public List<Move> getMovesAfter(Color color, ArrayList<Move> moves) {
+
+        ChessTile[][] temp = new ChessTile[8][8];
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                temp[x][y] = new ChessTile(this.board.getBoardArray()[x][y].getPiece().getColor(), this.board.getBoardArray()[x][y].getPiece());
+            }
+        }
+
+        Board b = new ChessBoard(temp);
+
+        for(int i = 0; i < moves.size(); i++)
+            applyMove(moves.get(i), b);
+
+        List<Move> futureMoves = getAllMovesForColor(color, false);
+
+        return futureMoves;
+    }
+
+    public List<Move> getMovesAfter(Color color, ArrayList<Move> moves, boolean hypothetical) {
+
+        ChessTile[][] temp = new ChessTile[8][8];
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                temp[x][y] = new ChessTile(this.board.getBoardArray()[x][y].getPiece().getColor(), this.board.getBoardArray()[x][y].getPiece());
+            }
+        }
+
+        Board b = new ChessBoard(temp);
+
+        for(int i = 0; i < moves.size(); i++)
+            applyMove(moves.get(i), b);
+
+        List<Move> futureMoves = getAllMovesForColor(color, hypothetical);
+
+        return futureMoves;
+    }
+
+    private List<Move> getAllMovesForColor(Color color, boolean hypothetical) {
+        List<Move> possibleMoves = new ArrayList<>();
+
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
+                ChessPiece piece = (ChessPiece) board.getBoardArray()[i][j].getPiece();
+                if(piece != null && piece.getColor().equals(color)) {
+                    for(MoveRule rule: piece.getMoveRules()) {
+                        if(isValidMove(new Coordinates(i, j), new Coordinates(rule.x, rule.y), player, hypothetical).equals("Valid move")) {
+                            possibleMoves.add(new Move(new Coordinates(i,j), new Coordinates(rule.x, rule.y)));
+                        }
+                    }
+                }
+            }
+        }
+
+        return possibleMoves;
+    }
+
+    public Tile[][] getTilesAfter(ArrayList<Move> moves) {
+
+        ChessTile[][] temp = new ChessTile[8][8];
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                temp[x][y] = new ChessTile(this.board.getBoardArray()[x][y].getPiece().getColor(), this.board.getBoardArray()[x][y].getPiece());
+            }
+        }
+
+        ChessBoard b = new ChessBoard(temp);
+
+        for(int i = 0; i < moves.size(); i++)
+            applyMove(moves.get(i), b);
+
+        ChessTile[][] temp2 = new ChessTile[8][8];
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                temp2[x][y] = new ChessTile(b.getBoardArray()[x][y].getPiece().getColor(), b.getBoardArray()[x][y].getPiece());
+            }
+        }
+
+        return temp2;
+    }
+
+    public boolean isCheckAfter(Color color, ArrayList<Move> moves) {
+
+        Tile[][] newTiles = getTilesAfter(moves);
+
+        int x = -1, y = -1;
+        for(int i = 0; i < 8; i++)
+            for(int j = 0; j < 8; j++) {
+                if(newTiles[i][j].getPiece() != null &&
+                        newTiles[i][j].getPiece().getColor().equals(color) &&
+                        newTiles[i][j].getPiece() instanceof King) {
+                    x = i; y = j;
+                }
+            }
+
+        // check a move if after making this move the king can be killed (moving into check)
+        List<Move> opponentMoves = getMovesAfter(getOppositeColor(color), moves, true);
+
+        // check all opponent moves if they kill king (opponent moves in next round)
+        for(int j = 0; j < opponentMoves.size(); j++) {
+            if(opponentMoves.get(j).getDestination().getX() == x && opponentMoves.get(j).getDestination().getY() == y)
+                return true;
+        }
+
+        return false;
+    }
+
+    private void applyMove(Move move, Board b) {
+        ChessTile fromTile = (ChessTile) b.getBoardArray()[move.getStart().getY()][move.getStart().getX()];
+        ChessPiece pieceToMove = fromTile.getPiece();
+
+        ChessTile toTile = (ChessTile) b.getBoardArray()[move.getDestination().getY()][move.getDestination().getX()];
+        toTile.setPiece(pieceToMove);
+
+        fromTile.empty();
+    }
+
+    private Color getOppositeColor(Color color) {
+        return color.equals(Color.White) ? Color.Black : Color.White;
     }
 
     // A utility function that gets all the possible moves for a piece, with illegal ones removed.

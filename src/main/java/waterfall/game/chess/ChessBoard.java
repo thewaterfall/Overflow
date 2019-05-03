@@ -19,6 +19,10 @@ public class ChessBoard implements Board {
         fillBoard();
     }
 
+    public ChessBoard(ChessTile[][] tiles) {
+        this.boardArray = tiles;
+    }
+
     @Override
     public ChessTile[][] getBoardArray() {
         return boardArray;

@@ -7,6 +7,8 @@ public interface Game {
 
     public boolean unregisterPlayer(Player player);
 
+    public Player getOpponent(Player player);
+
     public Move convertToMove(String coordsMove);
 
     public Board getBoard();
