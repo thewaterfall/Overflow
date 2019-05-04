@@ -131,7 +131,6 @@ public class SocketClientHandler implements ClientHandler {
             processLogout(command);
         } else if(command.getTypeCommand().equals("/play")) { // play [game] [player/bot]
             processPlay(command);
-        // /connect [lobbyId]
         } else if(command.getTypeCommand().equals("/connect")) { // /connect [lobbyId]
             processConnect(command);
             onGameReady();
@@ -167,19 +166,29 @@ public class SocketClientHandler implements ClientHandler {
         command.setTypeCommand(typeCommand);
     }
 
-    private void processDisconnect(Command command) {
-        if(isInLobby()) {
-            currentLobby.removeUser(currentUser);
-            currentLobby.getGame().unregisterPlayer(currentPlayer);
-            lobbyService.update(currentLobby);
+    private void disconnect() {
+        currentLobby.removeUser(currentUser);
+        currentLobby.getGame().unregisterPlayer(currentPlayer);
+        lobbyService.update(currentLobby);
 
-            currentLobby = null;
-            currentPlayer = null;
+        if (currentLobby.getUsers().isEmpty()) {
+            lobbyService.remove(currentLobby);
+        }
 
-            command.setMessage(currentUser.getUsername() + " has disconnected");
-            broadCast(command, false);
+        currentLobby = null;
+        currentPlayer = null;
+
+        if (opponent != null) {
             ((SocketClientHandler) opponent).setOpponent(null);
             opponent = null;
+        }
+    }
+
+    private void processDisconnect(Command command) {
+        if(isInLobby()) {
+            command.setMessage(currentUser.getUsername() + " has disconnected");
+            broadCast(command, false);
+            disconnect();
         } else {
             command.setMessage("There's no lobby to disconnect from");
             command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
@@ -253,6 +262,7 @@ public class SocketClientHandler implements ClientHandler {
                     command.setMessage(command.getMessage() + currentLobby.getOpponentFor(currentUser).getUsername() + " has won.");
                 }
 
+                disconnect();
                 lobbyService.remove(currentLobby);
             }
 
@@ -303,11 +313,13 @@ public class SocketClientHandler implements ClientHandler {
             currentLobby.getGame().registerPlayer(currentPlayer);
 
             lobbyService.save(currentLobby);
-            if (command.getAttributesCommand().get(1).equals("bot")) {
+
+            if (command.getAttributesCommand().get(1) != null && command.getAttributesCommand().get(1).equals("bot")) {
                 // TODO add logic to play vs bot
                 command.setMessage("The game has been started");
+            } else {
+                command.setMessage("Lobby has been created with id: " + currentLobby.getId());
             }
-            command.setMessage("Lobby has been created with id: " + currentLobby.getId());
         } else {
             command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
             command.setMessage("You are already in lobby");

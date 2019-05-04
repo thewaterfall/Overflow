@@ -88,9 +88,7 @@ public class SocketClient implements Client {
             command = commandUtil.constructCommand(request, CommandConstants.COMMAND_TYPE_REQUEST,
                     CommandConstants.COMMAND_SOURCE_CLIENT, null);
         } catch (IllegalCommandException e) {
-            e.printStackTrace();
             gui.write(e.getMessage());
-            // TODO when exception is caught, then no need to go next
             return;
         }
 
