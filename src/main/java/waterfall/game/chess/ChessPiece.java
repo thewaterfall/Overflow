@@ -32,7 +32,15 @@ public class ChessPiece implements Piece {
 
     public String getName(){ return name; }
 
-    public Color getColor(){ return color; }
+    @Override
+    public Color getColor(){
+        return color;
+    }
+
+    @Override
+    public float getCost() {
+        return 0;
+    }
 
     public char getCharValue(){ return charValue; }
 
