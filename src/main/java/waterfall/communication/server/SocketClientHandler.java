@@ -73,17 +73,22 @@ public class SocketClientHandler implements ClientHandler {
         isStopped = false;
 
         onConnect();
-        while (!isStopped()) {
-            Command command = receiveRequest();
-            Command response = processCommand(command);
-            sendResponse(response);
+        try {
+            while (!isStopped()) {
+                Command command = receiveRequest();
+                Command response = processCommand(command);
+                sendResponse(response);
+            }
+        } finally {
+            exit();
+            stopConnection();
         }
-
     }
 
     @Override
     public void stopConnection() {
         try {
+            clientHandlerList.remove(this);
             output.close();
             input.close();
             socket.close();
@@ -129,6 +134,8 @@ public class SocketClientHandler implements ClientHandler {
             processLogin(command);
         } else if(command.getTypeCommand().equals("/logout")) { // /logout
             processLogout(command);
+        } else if (command.getTypeCommand().equals("/exit")) {
+            processExit(command);
         } else if(command.getTypeCommand().equals("/play")) { // play [game] [player/bot]
             processPlay(command);
         } else if(command.getTypeCommand().equals("/connect")) { // /connect [lobbyId]
@@ -167,6 +174,19 @@ public class SocketClientHandler implements ClientHandler {
     }
 
     private void disconnect() {
+        Command command = null;
+        try {
+            command = commandUtil.constructCommand("/message",
+                    CommandConstants.COMMAND_TYPE_RESPONSE,
+                    CommandConstants.COMMAND_TYPE_HANDLER,
+                    CommandConstants.COMMAND_STATUS_SUCCESS);
+            command.setMessage(currentUser.getUsername() + " has disconnected");
+        } catch (IllegalCommandException e) {
+            e.printStackTrace();
+        }
+
+        broadCast(command, false);
+
         currentLobby.removeUser(currentUser);
         currentLobby.getGame().unregisterPlayer(currentPlayer);
         lobbyService.update(currentLobby);
@@ -184,11 +204,27 @@ public class SocketClientHandler implements ClientHandler {
         }
     }
 
+    private void exit() {
+        if (isInLobby()) {
+            disconnect();
+        }
+
+        if (isLoggedIn()) {
+            logout();
+        }
+    }
+
+    private void processExit(Command command) {
+        exit();
+        command.setMessage("You have successfully exited");
+
+        isStopped = true;
+    }
+
     private void processDisconnect(Command command) {
         if(isInLobby()) {
-            command.setMessage(currentUser.getUsername() + " has disconnected");
-            broadCast(command, false);
             disconnect();
+            command.setMessage("You have disconnected");
         } else {
             command.setMessage("There's no lobby to disconnect from");
             command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
@@ -314,7 +350,7 @@ public class SocketClientHandler implements ClientHandler {
 
             lobbyService.save(currentLobby);
 
-            if (command.getAttributesCommand().get(1) != null && command.getAttributesCommand().get(1).equals("bot")) {
+            if (command.getAttributesCommand().size() > 1 && command.getAttributesCommand().get(1).equals("bot")) {
                 // TODO add logic to play vs bot
                 command.setMessage("The game has been started");
             } else {
@@ -343,9 +379,13 @@ public class SocketClientHandler implements ClientHandler {
         }
     }
 
+    private void logout() {
+        currentUser = null;
+    }
+
     private void processLogout(Command command) {
         if(isLoggedIn()) {
-            currentUser = null;
+            logout();
             command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
             command.setMessage("You have successfully logged out");
         } else {
@@ -396,7 +436,7 @@ public class SocketClientHandler implements ClientHandler {
     }
 
     private Command verifyAuth(Command command) {
-        if (!isLoggedIn() && !command.getTypeCommand().equals("/login")) {
+        if (!isLoggedIn() && !command.getTypeCommand().equals("/login") && !command.getTypeCommand().equals("/exit")) {
             command = constuctLogin();
         }
 

@@ -134,6 +134,8 @@ public class SocketClient implements Client {
         } else if (command.getTypeCommand().equals("/logout") &&
                 command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) { // /logout
             user = null;
+        } else if (command.getTypeCommand().equals("/exit")) {
+            stopConnection();
         } else if (command.getTypeCommand().equals("/play")) { // play [game] [player/bot]
 
         } else if (command.getTypeCommand().equals("/connect")) {  // /connect [lobbyId]
