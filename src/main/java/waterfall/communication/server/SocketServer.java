@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 public class SocketServer implements Server {
     private ServerSocket serverSocket;
     private ExecutorService threadPool;
-    private List<SocketClientHandler> clientHandlerList;
+    private List<ClientHandler> clientHandlerList;
     private Injector injector;
     private Factory gameFactory;
     private Factory playerFactory;

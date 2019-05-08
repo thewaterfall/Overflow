@@ -3,6 +3,7 @@ package waterfall.communication.server;
 import com.google.inject.Inject;
 import waterfall.exception.IllegalCommandException;
 import waterfall.game.*;
+import waterfall.model.Account;
 import waterfall.model.GameStat;
 import waterfall.model.GameType;
 import waterfall.model.Lobby;
@@ -20,45 +21,22 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
+// TODO: refactor
 public class SocketClientHandler implements ClientHandler {
 
     private Socket socket;
     private BufferedReader input;
     private BufferedWriter output;
 
-    private List<SocketClientHandler> clientHandlerList;
-    private ClientHandler opponent;
-
     @Inject
     private CommandUtil commandUtil;
 
-    @Inject
-    private Security security;
-
-    private Lobby currentLobby;
-    private User currentUser;
-    private Player currentPlayer;
-
-    @Inject
-    private LobbyService lobbyService;
-
-    @Inject
-    private GameStatService gameStatService;
-
-    @Inject
-    private GameTypeService gameTypeService;
-
-    @Inject
-    private UserService userService;
-
-    private Factory gameFactory;
-    private Factory playerFactory;
+    private Account account;
 
     private boolean isStopped = true;
 
     public SocketClientHandler() {
-        this.gameFactory = new GameFactory();
-        this.playerFactory = new PlayerFactory();
+        this.account = new Account(this);
     }
 
     @Override
@@ -81,12 +59,16 @@ public class SocketClientHandler implements ClientHandler {
             }
         } finally {
             exit();
-            stopConnection();
+            stop();
         }
     }
 
     @Override
     public void stopConnection() {
+        isStopped = true;
+    }
+
+    private void stop() {
         try {
             clientHandlerList.remove(this);
             output.close();
@@ -95,8 +77,6 @@ public class SocketClientHandler implements ClientHandler {
         } catch(IOException e) {
             e.printStackTrace();
         }
-
-        isStopped = true;
     }
 
     @Override
@@ -126,36 +106,34 @@ public class SocketClientHandler implements ClientHandler {
     public Command processCommand(Command command) {
         command = verifyAuth(command);
 
-        command.setSource(CommandConstants.COMMAND_TYPE_HANDLER);
-        command.setType(CommandConstants.COMMAND_TYPE_RESPONSE);
-
-        // /login [username] [password]
-        if(command.getTypeCommand().equals("/login")) {
-            processLogin(command);
-        } else if(command.getTypeCommand().equals("/logout")) { // /logout
-            processLogout(command);
-        } else if (command.getTypeCommand().equals("/exit")) {
-            processExit(command);
-        } else if(command.getTypeCommand().equals("/play")) { // play [game] [player/bot]
-            processPlay(command);
-        } else if(command.getTypeCommand().equals("/connect")) { // /connect [lobbyId]
-            processConnect(command);
-            onGameReady();
-        } else if (command.getTypeCommand().equals("/move")) { // /move [from] [to]
-            processMove(command);
-        } else if (command.getTypeCommand().equals("/leaderboard")) { // /leaderboard [gameType]
-            processLeaderboard(command);
-        } else if (command.getTypeCommand().equals("/disconnect")) { // /disconnect
-            processDisconnect(command);
-        }
+//        // /login [username] [password]
+//        if(command.getTypeCommand().equals("/login")) {
+//            processLogin(command);
+//        } else if(command.getTypeCommand().equals("/logout")) { // /logout
+//            processLogout(command);
+//        } else if (command.getTypeCommand().equals("/exit")) {
+//            processExit(command);
+//        } else if(command.getTypeCommand().equals("/play")) { // play [game] [player/bot]
+//            processPlay(command);
+//        } else if(command.getTypeCommand().equals("/connect")) { // /connect [lobbyId]
+//            processConnect(command);
+//            onGameReady();
+//        } else if (command.getTypeCommand().equals("/move")) { // /move [from] [to]
+//            processMove(command);
+//        } else if (command.getTypeCommand().equals("/leaderboard")) { // /leaderboard [gameType]
+//            processLeaderboard(command);
+//        } else if (command.getTypeCommand().equals("/disconnect")) { // /disconnect
+//            processDisconnect(command);
+//        }
 
         return command;
     }
 
     @Override
-    public Game getCurrentGame() {
-        return currentLobby.getGame();
+    public Account getAccount() {
+        return account;
     }
+
 
     private void broadCast(Command command, boolean isEveryone) {
         String typeCommand = command.getTypeCommand();
@@ -171,76 +149,6 @@ public class SocketClientHandler implements ClientHandler {
         }
 
         command.setTypeCommand(typeCommand);
-    }
-
-    private void disconnect() {
-        Command command = null;
-        try {
-            command = commandUtil.constructCommand("/message",
-                    CommandConstants.COMMAND_TYPE_RESPONSE,
-                    CommandConstants.COMMAND_TYPE_HANDLER,
-                    CommandConstants.COMMAND_STATUS_SUCCESS);
-            command.setMessage(currentUser.getUsername() + " has disconnected");
-        } catch (IllegalCommandException e) {
-            e.printStackTrace();
-        }
-
-        broadCast(command, false);
-
-        currentLobby.removeUser(currentUser);
-        currentLobby.getGame().unregisterPlayer(currentPlayer);
-        lobbyService.update(currentLobby);
-
-        if (currentLobby.getUsers().isEmpty()) {
-            lobbyService.remove(currentLobby);
-        }
-
-        currentLobby = null;
-        currentPlayer = null;
-
-        if (opponent != null) {
-            ((SocketClientHandler) opponent).setOpponent(null);
-            opponent = null;
-        }
-    }
-
-    private void exit() {
-        if (isInLobby()) {
-            disconnect();
-        }
-
-        if (isLoggedIn()) {
-            logout();
-        }
-    }
-
-    private void processExit(Command command) {
-        exit();
-        command.setMessage("You have successfully exited");
-
-        isStopped = true;
-    }
-
-    private void processDisconnect(Command command) {
-        if(isInLobby()) {
-            disconnect();
-            command.setMessage("You have disconnected");
-        } else {
-            command.setMessage("There's no lobby to disconnect from");
-            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-        }
-    }
-
-    private void processLeaderboard(Command command) {
-        GameType gameType = gameTypeService.findByName(command.getAttributesCommand().get(0));
-        if (gameType != null) {
-            command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
-            command.addParameter("leaderboard", userService.getLeaderboard(gameType));
-            command.setMessage("Leaderbord for " + gameType.getType() + " game type");
-        } else {
-            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-            command.setMessage("There's no such game");
-        }
     }
 
     private void processMove(Command command) {
@@ -308,110 +216,6 @@ public class SocketClientHandler implements ClientHandler {
             command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
             command.setMessage("You are not in a game");
         }
-    }
-
-    private void processConnect(Command command) {
-        if(!isInLobby()) {
-            Lobby lobby = lobbyService.findById(Integer.valueOf(command.getAttributesCommand().get(0)));
-            if (!lobby.isLobbyFull()) {
-                currentLobby = lobby;
-                currentLobby.addUser(currentUser);
-                lobbyService.update(currentLobby);
-
-                currentPlayer = (Player) playerFactory.getBean(currentLobby.getGameType().getType());
-
-                findOpponentHandler();
-
-                currentLobby.setGame(opponent.getCurrentGame());
-                currentLobby.getGame().registerPlayer(currentPlayer);
-
-                command.setMessage("You have successfully connected");
-                command.addParameter("board", currentLobby.getGame().getBoard());
-            } else {
-                command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-                command.setMessage("Lobby is full");
-            }
-        } else {
-            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-            command.setMessage("You are already in lobby");
-        }
-    }
-
-    private void processPlay(Command command) {
-        if(!isInLobby()) {
-            command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
-            currentLobby = new Lobby();
-            currentLobby.addUser(currentUser);
-
-            currentLobby.setGame((Game) gameFactory.getBean(command.getAttributesCommand().get(0)));
-            currentLobby.setGameType(gameTypeService.findByName(command.getAttributesCommand().get(0)));
-            currentPlayer = (Player) playerFactory.getBean(command.getAttributesCommand().get(0));
-            currentLobby.getGame().registerPlayer(currentPlayer);
-
-            lobbyService.save(currentLobby);
-
-            if (command.getAttributesCommand().size() > 1 && command.getAttributesCommand().get(1).equals("bot")) {
-                // TODO add logic to play vs bot
-                command.setMessage("The game has been started");
-            } else {
-                command.setMessage("Lobby has been created with id: " + currentLobby.getId());
-            }
-        } else {
-            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-            command.setMessage("You are already in lobby");
-        }
-    }
-
-    private void processLogin(Command command) {
-        if(!isLoggedIn()) {
-            currentUser = security.authorize(command.getAttributesCommand().get(0), command.getAttributesCommand().get(1));
-            if (currentUser != null) {
-                command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
-                command.setMessage("Hello " + command.getAttributesCommand().get(0));
-                command.addParameter("user", currentUser);
-            } else {
-                command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-                command.setMessage("User is not found");
-            }
-        } else {
-            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-            command.setMessage("You are already logged in");
-        }
-    }
-
-    private void logout() {
-        currentUser = null;
-    }
-
-    private void processLogout(Command command) {
-        if(isLoggedIn()) {
-            logout();
-            command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
-            command.setMessage("You have successfully logged out");
-        } else {
-            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-            command.setMessage("You are not logged in yet");
-        }
-    }
-
-    private boolean findOpponentHandler() {
-        for(SocketClientHandler handler: clientHandlerList) {
-            if (currentLobby.getUsers().contains(handler.getCurrentUser()) &&
-                    !handler.getCurrentUser().equals(currentUser)) {
-                opponent = handler;
-                handler.setOpponent(this);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isInLobby() {
-        return currentLobby != null;
-    }
-
-    private boolean isLoggedIn() {
-        return currentUser != null;
     }
 
     public boolean isStopped() {
@@ -491,8 +295,8 @@ public class SocketClientHandler implements ClientHandler {
         return clientHandlerList;
     }
 
-    public void setClientHandlerList(List<SocketClientHandler> clientHandlerList) {
-        this.clientHandlerList = clientHandlerList;
+    public void setClientHandlerList(List<ClientHandler> clientHandlerList) {
+        this.account.setClientHandlers(clientHandlerList);
     }
 
     public Factory getGameFactory() {
