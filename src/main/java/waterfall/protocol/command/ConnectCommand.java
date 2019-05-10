@@ -1,8 +1,10 @@
 package waterfall.protocol.command;
 
 import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import waterfall.communication.Sender;
 import waterfall.communication.server.ClientHandler;
-import waterfall.exception.IllegalCommandException;
 import waterfall.game.PlayerFactory;
 import waterfall.model.Account;
 import waterfall.model.Lobby;
@@ -12,6 +14,9 @@ import waterfall.protocol.CommandUtil;
 import waterfall.service.LobbyService;
 
 public class ConnectCommand implements CommandAction {
+
+    @Inject
+    private Sender sender;
 
     @Inject
     private CommandUtil commandUtil;
@@ -28,15 +33,12 @@ public class ConnectCommand implements CommandAction {
     @Override
     public Command execute(ClientHandler clientHandler, Command command) {
         Account account = clientHandler.getAccount();
-        Command response = null;
-        try {
-            response = commandUtil.constructCommand(command.getTypeCommand(),
-                    CommandConstants.COMMAND_TYPE_RESPONSE,
-                    CommandConstants.COMMAND_TYPE_HANDLER,
-                    CommandConstants.COMMAND_STATUS_SUCCESS);
-        } catch (IllegalCommandException e) {
-            e.printStackTrace();
-        }
+        Command response = commandUtil.constructCommand(
+                command.getTypeCommand(),
+                CommandConstants.COMMAND_TYPE_RESPONSE,
+                CommandConstants.COMMAND_TYPE_HANDLER,
+                CommandConstants.COMMAND_STATUS_SUCCESS
+        );
 
 
         if(!account.isInLobby()) {
@@ -57,6 +59,8 @@ public class ConnectCommand implements CommandAction {
 
                 response.setMessage("You have successfully connected");
                 response.addParameter("board", lobby.getGame().getBoard());
+
+                onGameReady(clientHandler);
             } else {
                 response.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
                 response.setMessage("Lobby is full");
@@ -67,5 +71,27 @@ public class ConnectCommand implements CommandAction {
         }
 
         return response;
+    }
+
+    private void onGameReady(ClientHandler clientHandler) {
+        Account account = clientHandler.getAccount();
+        Lobby currentLobby = account.getLobby();
+        currentLobby.getGame().start();
+
+        Command command = commandUtil.constructCommand(
+                CommandConstants.COMMAND_MESSAGE,
+                CommandConstants.COMMAND_TYPE_RESPONSE,
+                CommandConstants.COMMAND_TYPE_HANDLER,
+                CommandConstants.COMMAND_STATUS_SUCCESS
+        );
+
+        command.addParameter("board", currentLobby.getGame().getBoard());
+        command.setMessage("Game is ready!");
+
+        List<ClientHandler> sendTo = new ArrayList<>();
+        sendTo.add(clientHandler);
+        sendTo.add(account.getOpponentHandler());
+
+        sender.send(sendTo, command);
     }
 }

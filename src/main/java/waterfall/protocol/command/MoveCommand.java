@@ -1,8 +1,9 @@
 package waterfall.protocol.command;
 
 import com.google.inject.Inject;
+import java.util.Arrays;
+import waterfall.communication.Sender;
 import waterfall.communication.server.ClientHandler;
-import waterfall.exception.IllegalCommandException;
 import waterfall.game.Game;
 import waterfall.game.Move;
 import waterfall.game.Player;
@@ -18,6 +19,9 @@ import waterfall.service.LobbyService;
 import waterfall.service.UserService;
 
 public class MoveCommand implements CommandAction {
+
+    @Inject
+    private Sender sender;
 
     @Inject
     private CommandUtil commandUtil;
@@ -39,15 +43,10 @@ public class MoveCommand implements CommandAction {
         Player currentPlayer = account.getPlayer();
         User currentUser = account.getUser();
 
-        Command response = null;
-        try {
-            response = commandUtil.constructCommand(command.getTypeCommand(),
-                    CommandConstants.COMMAND_TYPE_RESPONSE,
-                    CommandConstants.COMMAND_TYPE_HANDLER,
-                    CommandConstants.COMMAND_STATUS_SUCCESS);
-        } catch (IllegalCommandException e) {
-            e.printStackTrace();
-        }
+        Command response = commandUtil.constructCommand(command.getTypeCommand(),
+                CommandConstants.COMMAND_TYPE_RESPONSE,
+                CommandConstants.COMMAND_TYPE_HANDLER,
+                CommandConstants.COMMAND_STATUS_SUCCESS);
 
         if (account.isInLobby()) {
             if (!currentLobby.isLobbyFull()) {
@@ -108,29 +107,12 @@ public class MoveCommand implements CommandAction {
             }
 
             if (response.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS))
-                broadcast(clientHandler, response, false);
+                sender.send(Arrays.asList(account.getOpponentHandler()), response);
+
         } else {
             response.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
             response.setMessage("You are not in a game");
         }
         return null;
-    }
-
-    private void broadcast(ClientHandler clientHandler, Command command, boolean isEveryone) {
-        String typeCommand = command.getTypeCommand();
-        ClientHandler opponentHandler = clientHandler.getAccount().getOpponentHandler();
-
-        command.setTypeCommand("/message");
-        if (opponentHandler != null) {
-            if (isEveryone) {
-                opponentHandler.sendResponse(command);
-                clientHandler.sendResponse(command);
-            } else {
-                opponentHandler.sendResponse(command);
-            }
-        }
-
-        command.setTypeCommand(typeCommand);
-
     }
 }

@@ -2,7 +2,6 @@ package waterfall.protocol.command;
 
 import com.google.inject.Inject;
 import waterfall.communication.server.ClientHandler;
-import waterfall.exception.IllegalCommandException;
 import waterfall.model.Account;
 import waterfall.protocol.Command;
 import waterfall.protocol.CommandConstants;
@@ -16,15 +15,10 @@ public class LogoutCommand implements CommandAction {
     @Override
     public Command execute(ClientHandler clientHandler, Command command) {
         Account account = clientHandler.getAccount();
-        Command response = null;
-        try {
-            response = commandUtil.constructCommand(command.getTypeCommand(),
-                    CommandConstants.COMMAND_TYPE_RESPONSE,
-                    CommandConstants.COMMAND_TYPE_HANDLER,
-                    CommandConstants.COMMAND_STATUS_SUCCESS);
-        } catch (IllegalCommandException e) {
-            e.printStackTrace();
-        }
+        Command response = commandUtil.constructCommand(command.getTypeCommand(),
+                CommandConstants.COMMAND_TYPE_RESPONSE,
+                CommandConstants.COMMAND_TYPE_HANDLER,
+                CommandConstants.COMMAND_STATUS_SUCCESS);
 
         if(account.isLoggedIn()) {
             logout(account);
