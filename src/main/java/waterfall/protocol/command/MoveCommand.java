@@ -1,7 +1,6 @@
 package waterfall.protocol.command;
 
 import com.google.inject.Inject;
-import java.util.Arrays;
 import waterfall.communication.Sender;
 import waterfall.communication.server.ClientHandler;
 import waterfall.game.Game;
@@ -17,6 +16,8 @@ import waterfall.protocol.CommandUtil;
 import waterfall.service.GameStatService;
 import waterfall.service.LobbyService;
 import waterfall.service.UserService;
+
+import java.util.Arrays;
 
 public class MoveCommand implements CommandAction {
 
@@ -115,6 +116,7 @@ public class MoveCommand implements CommandAction {
             response.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
             response.setMessage("You are not in a game");
         }
-        return null;
+
+        return response;
     }
 }

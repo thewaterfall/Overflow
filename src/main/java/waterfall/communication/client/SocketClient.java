@@ -122,7 +122,8 @@ public class SocketClient implements Client {
             stopConnection();
         }
 
-        if(command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
+        if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS) &&
+                command.getParameter("board") != null) {
             board = (Board) command.getParameter("board");
             gui.updateBoard(board);
             gui.update();

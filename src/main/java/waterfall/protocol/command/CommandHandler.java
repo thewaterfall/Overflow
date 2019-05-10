@@ -29,7 +29,7 @@ public class CommandHandler {
     public static CommandAction getCommand(String command) {
         CommandAction commandAction = commandActionMap.get(command);
 
-        if(command != null) {
+        if (commandAction != null) {
             return commandAction;
         } else {
             return commandActionMap.get(CommandConstants.COMMAND_MESSAGE);
