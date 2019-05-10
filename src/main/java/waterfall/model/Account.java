@@ -1,8 +1,9 @@
 package waterfall.model;
 
-import java.util.List;
 import waterfall.communication.server.ClientHandler;
 import waterfall.game.Player;
+
+import java.util.List;
 
 public class Account {
     private User user;
@@ -61,10 +62,6 @@ public class Account {
     }
 
     public ClientHandler getOpponentHandler() {
-        if(opponentHandler == null) {
-            findOpponentHandler();
-        }
-
         return opponentHandler;
     }
     public void setOpponentHandler(ClientHandler opponentHandler) {
@@ -74,10 +71,12 @@ public class Account {
     public ClientHandler getCurrentClientHandler() {
         return currentClientHandler;
     }
+
     public void setCurrentClientHandler(ClientHandler currentClientHandler) {
         this.currentClientHandler = currentClientHandler;
     }
-    private boolean findOpponentHandler() {
+
+    public boolean findOpponentHandler() {
         for(ClientHandler handler: clientHandlers) {
             Account account = handler.getAccount();
             if (lobby.getUsers().contains(account.getUser()) &&

@@ -28,11 +28,11 @@ public class LogoutCommand implements CommandAction {
 
         if(account.isLoggedIn()) {
             logout(account);
-            command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
-            command.setMessage("You have successfully logged out");
+            response.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
+            response.setMessage("You have successfully logged out");
         } else {
-            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-            command.setMessage("You are not logged in yet");
+            response.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
+            response.setMessage("You are not logged in yet");
         }
 
         return response;

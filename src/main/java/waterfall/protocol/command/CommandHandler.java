@@ -1,17 +1,28 @@
 package waterfall.protocol.command;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import waterfall.injection.Module;
 import waterfall.protocol.CommandConstants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class CommandHandler {
+    private static Injector injector;
     private static Map<String, CommandAction> commandActionMap = new HashMap<>();
     static {
-        commandActionMap.put(CommandConstants.COMMAND_LOGIN, new LoginCommand());
-        commandActionMap.put(CommandConstants.COMMAND_LOGOUT, new LogoutCommand());
-        commandActionMap.put(CommandConstants.COMMAND_DISCONNECT, new DisconnectCommand());
-        commandActionMap.put(CommandConstants.COMMAND_EXIT, new ExitCommand());
-        commandActionMap.put(CommandConstants.COMMAND_PLAY, new PlayCommand());
+        injector = Guice.createInjector(new Module());
+
+        commandActionMap.put(CommandConstants.COMMAND_LOGIN, injector.getInstance(LoginCommand.class));
+        commandActionMap.put(CommandConstants.COMMAND_LOGOUT, injector.getInstance(LogoutCommand.class));
+        commandActionMap.put(CommandConstants.COMMAND_DISCONNECT, injector.getInstance(DisconnectCommand.class));
+        commandActionMap.put(CommandConstants.COMMAND_EXIT, injector.getInstance(ExitCommand.class));
+        commandActionMap.put(CommandConstants.COMMAND_PLAY, injector.getInstance(PlayCommand.class));
+        commandActionMap.put(CommandConstants.COMMAND_CONNECT, injector.getInstance(ConnectCommand.class));
+        commandActionMap.put(CommandConstants.COMMAND_MOVE, injector.getInstance(MoveCommand.class));
+        commandActionMap.put(CommandConstants.COMMAND_LEADERBOARD, injector.getInstance(LeaderboardCommand.class));
+        commandActionMap.put(CommandConstants.COMMAND_MESSAGE, injector.getInstance(MessageCommand.class));
     }
 
     public static CommandAction getCommand(String command) {

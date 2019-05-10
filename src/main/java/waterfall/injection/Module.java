@@ -1,7 +1,6 @@
 package waterfall.injection;
 
 import com.google.inject.AbstractModule;
-import java.net.Socket;
 import waterfall.communication.client.Client;
 import waterfall.communication.client.SocketClient;
 import waterfall.communication.server.ClientHandler;
@@ -32,5 +31,15 @@ public class Module extends AbstractModule {
 
         bind(Client.class).to(SocketClient.class);
         bind(ClientHandler.class).to(SocketClientHandler.class);
+
+//        bind(ConnectCommand.class).to(ConnectCommand.class);
+//        bind(DisconnectCommand.class).to(DisconnectCommand.class);
+//        bind(ExitCommand.class).to(ExitCommand.class);
+//        bind(LeaderboardCommand.class).to(LeaderboardCommand.class);
+//        bind(LoginCommand.class).to(LoginCommand.class);
+//        bind(LogoutCommand.class).to(LogoutCommand.class);
+//        bind(MoveCommand.class).to(MoveCommand.class);
+//        bind(PlayCommand.class).to(PlayCommand.class);
+
     }
 }

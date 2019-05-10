@@ -32,10 +32,10 @@ public class DisconnectCommand implements CommandAction {
 
         if(account.isInLobby()) {
             disconnect(clientHandler);
-            command.setMessage("You have disconnected");
+            response.setMessage("You have disconnected");
         } else {
-            command.setMessage("There's no lobby to disconnect from");
-            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
+            response.setMessage("There's no lobby to disconnect from");
+            response.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
         }
 
         return response;

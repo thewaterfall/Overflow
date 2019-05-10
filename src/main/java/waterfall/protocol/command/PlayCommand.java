@@ -48,7 +48,7 @@ public class PlayCommand implements CommandAction {
         }
 
         if(!account.isInLobby()) {
-            command.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
+            response.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
             Lobby currentLobby = new Lobby();
             account.setLobby(currentLobby);
 
@@ -63,13 +63,13 @@ public class PlayCommand implements CommandAction {
 
             if (command.getAttributesCommand().size() > 1 && command.getAttributesCommand().get(1).equals("bot")) {
                 // TODO add logic to play vs bot
-                command.setMessage("The game has been started.");
+                response.setMessage("The game has been started.");
             } else {
-                command.setMessage("Lobby has been created with id: " + currentLobby.getId());
+                response.setMessage("Lobby has been created with id: " + currentLobby.getId());
             }
         } else {
-            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-            command.setMessage("You are already in lobby.");
+            response.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
+            response.setMessage("You are already in lobby.");
         }
 
         return response;

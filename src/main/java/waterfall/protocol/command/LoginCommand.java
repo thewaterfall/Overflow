@@ -34,6 +34,7 @@ public class LoginCommand implements CommandAction {
         if(!account.isLoggedIn()) {
             User user = login(command.getAttributesCommand().get(0), command.getAttributesCommand().get(1));
             if(user != null) {
+                account.setUser(user);
                 response.setMessage("You have successfully logged in.");
             } else {
                 response.setMessage("User is not found.");

@@ -3,7 +3,6 @@ package waterfall.protocol.command;
 import com.google.inject.Inject;
 import waterfall.communication.server.ClientHandler;
 import waterfall.exception.IllegalCommandException;
-import waterfall.game.Player;
 import waterfall.game.PlayerFactory;
 import waterfall.model.Account;
 import waterfall.model.Lobby;
@@ -42,26 +41,29 @@ public class ConnectCommand implements CommandAction {
 
         if(!account.isInLobby()) {
             Lobby lobby = lobbyService.findById(Integer.valueOf(command.getAttributesCommand().get(0)));
+            account.setLobby(lobby);
+
             if (!lobby.isLobbyFull()) {
                 lobby.addUser(account.getUser());
                 lobbyService.update(lobby);
 
                 account.setPlayer(playerFactory.getBean(lobby.getGameType().getType()));
 
+                account.findOpponentHandler();
+
                 lobby.setGame(account.getOpponentHandler().getAccount().getLobby().getGame());
                 lobby.getGame().registerPlayer(account.getPlayer());
 
-                account.setLobby(lobby);
 
-                command.setMessage("You have successfully connected");
-                command.addParameter("board", lobby.getGame().getBoard());
+                response.setMessage("You have successfully connected");
+                response.addParameter("board", lobby.getGame().getBoard());
             } else {
-                command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-                command.setMessage("Lobby is full");
+                response.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
+                response.setMessage("Lobby is full");
             }
         } else {
-            command.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
-            command.setMessage("You are already in lobby");
+            response.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
+            response.setMessage("You are already in lobby");
         }
 
         return response;
