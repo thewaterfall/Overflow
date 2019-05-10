@@ -43,10 +43,12 @@ public class MoveCommand implements CommandAction {
         Player currentPlayer = account.getPlayer();
         User currentUser = account.getUser();
 
-        Command response = commandUtil.constructCommand(command.getTypeCommand(),
+        Command response = commandUtil.constructCommand(
+                CommandConstants.COMMAND_MOVE,
                 CommandConstants.COMMAND_TYPE_RESPONSE,
                 CommandConstants.COMMAND_TYPE_HANDLER,
-                CommandConstants.COMMAND_STATUS_SUCCESS);
+                CommandConstants.COMMAND_STATUS_SUCCESS
+        );
 
         if (account.isInLobby()) {
             if (!currentLobby.isLobbyFull()) {

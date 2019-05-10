@@ -36,7 +36,8 @@ public class PlayCommand implements CommandAction {
     @Override
     public Command execute(ClientHandler clientHandler, Command command) {
         Account account = clientHandler.getAccount();
-        Command response = commandUtil.constructCommand(command.getTypeCommand(),
+        Command response = commandUtil.constructCommand(
+                CommandConstants.COMMAND_PLAY,
                 CommandConstants.COMMAND_TYPE_RESPONSE,
                 CommandConstants.COMMAND_TYPE_HANDLER,
                 CommandConstants.COMMAND_STATUS_SUCCESS);

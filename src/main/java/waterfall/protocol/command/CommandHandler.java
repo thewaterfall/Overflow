@@ -8,6 +8,7 @@ import waterfall.protocol.CommandConstants;
 import java.util.HashMap;
 import java.util.Map;
 
+// TODO: refactor
 public class CommandHandler {
     private static Injector injector;
     private static Map<String, CommandAction> commandActionMap = new HashMap<>();
@@ -26,6 +27,12 @@ public class CommandHandler {
     }
 
     public static CommandAction getCommand(String command) {
-        return commandActionMap.get(command);
+        CommandAction commandAction = commandActionMap.get(command);
+
+        if(command != null) {
+            return commandAction;
+        } else {
+            return commandActionMap.get(CommandConstants.COMMAND_MESSAGE);
+        }
     }
 }

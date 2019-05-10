@@ -33,7 +33,7 @@ public class SocketClientHandler implements ClientHandler {
         start();
 
         onConnect();
-        Command command = null;
+        Command command = new Command();
         try {
             while (!isStopped()) {
                 command = receiveRequest();
@@ -124,12 +124,13 @@ public class SocketClientHandler implements ClientHandler {
     }
 
     private Command constructLogin() {
-        String loginMessage = "Type /login [username] [password] to log in.";
-
-        Command command = new Command();
-        command.setMessage(loginMessage);
-
-        command = CommandHandler.getCommand(CommandConstants.COMMAND_MESSAGE).execute(this, command);
+        Command command = commandUtil.constructCommand(
+                CommandConstants.COMMAND_MESSAGE,
+                CommandConstants.COMMAND_TYPE_RESPONSE,
+                CommandConstants.COMMAND_TYPE_HANDLER,
+                CommandConstants.COMMAND_STATUS_SUCCESS
+        );
+        command.setMessage("Type /login [username] [password] to log in.");
 
         return command;
     }

@@ -23,7 +23,7 @@ public class LeaderboardCommand implements CommandAction {
     @Override
     public Command execute(ClientHandler clientHandler, Command command) {
         Command response = commandUtil.constructCommand(
-                command.getTypeCommand(),
+                CommandConstants.COMMAND_LEADERBOARD,
                 CommandConstants.COMMAND_TYPE_RESPONSE,
                 CommandConstants.COMMAND_TYPE_HANDLER,
                 CommandConstants.COMMAND_STATUS_SUCCESS

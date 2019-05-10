@@ -25,7 +25,7 @@ public class DisconnectCommand implements CommandAction {
     public Command execute(ClientHandler clientHandler, Command command) {
         Account account = clientHandler.getAccount();
         Command response = commandUtil.constructCommand(
-                command.getTypeCommand(),
+                CommandConstants.COMMAND_DISCONNECT,
                 CommandConstants.COMMAND_TYPE_RESPONSE,
                 CommandConstants.COMMAND_TYPE_HANDLER,
                 CommandConstants.COMMAND_STATUS_SUCCESS

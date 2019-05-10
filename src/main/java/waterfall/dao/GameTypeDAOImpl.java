@@ -4,7 +4,6 @@ import org.hibernate.query.Query;
 import waterfall.model.GameType;
 import waterfall.util.HibernateUtil;
 
-// TODO implement methods
 public class GameTypeDAOImpl extends AbstractDAO<Integer, GameType> implements GameTypeDAO {
 
     public GameTypeDAOImpl() {
