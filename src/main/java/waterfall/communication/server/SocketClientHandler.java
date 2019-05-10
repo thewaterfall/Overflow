@@ -30,14 +30,7 @@ public class SocketClientHandler implements ClientHandler {
 
     @Override
     public void run() {
-        try {
-            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        isStopped = false;
+        start();
 
         onConnect();
         Command command = null;
@@ -56,6 +49,17 @@ public class SocketClientHandler implements ClientHandler {
     @Override
     public void stopConnection() {
         isStopped = true;
+    }
+
+    private void start() {
+        try {
+            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        isStopped = false;
     }
 
     private void stop() {
