@@ -1,9 +1,7 @@
 package waterfall.communication.server;
 
 import com.google.inject.Inject;
-import waterfall.exception.IllegalCommandException;
 import waterfall.model.Account;
-import waterfall.model.Lobby;
 import waterfall.protocol.Command;
 import waterfall.protocol.CommandConstants;
 import waterfall.protocol.CommandUtil;
@@ -13,7 +11,6 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
-// TODO: refactor
 public class SocketClientHandler implements ClientHandler {
 
     private Socket socket;
@@ -99,25 +96,6 @@ public class SocketClientHandler implements ClientHandler {
     public Command processCommand(Command command) {
         command = verifyAuth(command);
         Command response = CommandHandler.getCommand(command.getTypeCommand()).execute(this, command);
-//        // /login [username] [password]
-//        if(command.getTypeCommand().equals("/login")) {
-//            processLogin(command);
-//        } else if(command.getTypeCommand().equals("/logout")) { // /logout
-//            processLogout(command);
-//        } else if (command.getTypeCommand().equals("/exit")) {
-//            processExit(command);
-//        } else if(command.getTypeCommand().equals("/play")) { // play [game] [player/bot]
-//            processPlay(command);
-//        } else if(command.getTypeCommand().equals("/connect")) { // /connect [lobbyId]
-//            processConnect(command);
-//        onGameReady();
-//        } else if (command.getTypeCommand().equals("/move")) { // /move [from] [to]
-//            processMove(command);
-//        } else if (command.getTypeCommand().equals("/leaderboard")) { // /leaderboard [gameType]
-//            processLeaderboard(command);
-//        } else if (command.getTypeCommand().equals("/disconnect")) { // /disconnect
-//            processDisconnect(command);
-//        }
 
         return response;
     }
@@ -131,66 +109,29 @@ public class SocketClientHandler implements ClientHandler {
         return isStopped;
     }
 
-    private void onGameReady() {
-        Lobby currentLobby = account.getLobby();
-        currentLobby.getGame().start();
-
-        Command broadcastCommand = null;
-        try {
-            broadcastCommand = commandUtil.constructCommand("/message",
-                    CommandConstants.COMMAND_TYPE_RESPONSE, CommandConstants.COMMAND_TYPE_HANDLER,
-                    CommandConstants.COMMAND_STATUS_SUCCESS);
-            broadcastCommand.addParameter("board", currentLobby.getGame().getBoard());
-            broadcastCommand.setMessage("Game is ready!");
-        } catch (IllegalCommandException e) {
-            e.printStackTrace();
-        }
-
-        broadcast(broadcastCommand, true);
-    }
-
-    private void broadcast(Command command, boolean isEveryone) {
-        String typeCommand = command.getTypeCommand();
-        ClientHandler opponent = account.getOpponentHandler();
-
-        command.setTypeCommand("/message");
-        if (opponent != null) {
-            if (isEveryone) {
-                opponent.sendResponse(command);
-                sendResponse(command);
-            } else {
-                opponent.sendResponse(command);
-            }
-        }
-
-        command.setTypeCommand(typeCommand);
-    }
-
     private Command verifyAuth(Command command) {
-        if (!account.isLoggedIn() && !command.getTypeCommand().equals("/login") && !command.getTypeCommand().equals("/exit")) {
-            command = constuctLogin();
+        if (!account.isLoggedIn() &&
+                !command.getTypeCommand().equals(CommandConstants.COMMAND_LOGIN) &&
+                !command.getTypeCommand().equals(CommandConstants.COMMAND_EXIT)) {
+            command = constructLogin();
         }
 
         return command;
     }
 
-    private Command constuctLogin() {
+    private Command constructLogin() {
         String loginMessage = "Type /login [username] [password] to log in.";
 
-        Command command = null;
-        try {
-            command = commandUtil.constructCommand("/message", CommandConstants.COMMAND_TYPE_RESPONSE,
-                    CommandConstants.COMMAND_TYPE_HANDLER, CommandConstants.COMMAND_STATUS_SUCCESS);
-            command.setMessage(loginMessage);
-        } catch (IllegalCommandException e) {
-            e.printStackTrace();
-        }
+        Command command = new Command();
+        command.setMessage(loginMessage);
+
+        command = CommandHandler.getCommand(CommandConstants.COMMAND_MESSAGE).execute(this, command);
 
         return command;
     }
 
     private void onConnect() {
-        Command loginCommand = constuctLogin();
+        Command loginCommand = constructLogin();
         sendResponse(loginCommand);
     }
 
