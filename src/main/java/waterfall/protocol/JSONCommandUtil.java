@@ -3,7 +3,6 @@ package waterfall.protocol;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import waterfall.exception.IllegalCommandException;
 
 import java.io.IOException;
 
@@ -42,10 +41,7 @@ public class JSONCommandUtil implements CommandUtil {
     }
 
     @Override
-    public Command constructCommand(String toConstruct, String commandType, String from, String status) throws IllegalCommandException {
-        if(!toConstruct.startsWith("/"))
-            throw new IllegalCommandException("Command should start with '/' symbol");
-
+    public Command constructCommand(String toConstruct, String commandType, String from, String status) {
         Command command = new Command(commandType, status, from, toConstruct);
         command.setFullCommand(toConstruct);
 
