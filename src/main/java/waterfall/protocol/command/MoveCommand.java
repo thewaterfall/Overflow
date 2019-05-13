@@ -96,7 +96,7 @@ public class MoveCommand implements CommandAction {
                     currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()).addLose();
 
                     gameStatService.update(currentUser.getGameStat(currentLobby.getGameType()));
-                    response.setMessage(response.getMessage() + currentUser.getUsername() + " has won.");
+                    response.setMessage(response.getMessage() + "\n" + currentUser.getUsername() + " has won.");
                 } else {
                     currentLobby.getOpponentFor(currentUser).getGameStat(currentLobby.getGameType()).addWin();
                     currentUser.getGameStat(currentLobby.getGameType()).addLose();

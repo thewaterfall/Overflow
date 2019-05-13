@@ -3,11 +3,14 @@ package waterfall.protocol.command;
 import com.google.inject.Inject;
 import waterfall.communication.server.ClientHandler;
 import waterfall.model.GameType;
+import waterfall.model.User;
 import waterfall.protocol.Command;
 import waterfall.protocol.CommandConstants;
 import waterfall.protocol.CommandUtil;
 import waterfall.service.GameTypeService;
 import waterfall.service.UserService;
+
+import java.util.List;
 
 public class LeaderboardCommand implements CommandAction {
 
@@ -33,12 +36,22 @@ public class LeaderboardCommand implements CommandAction {
         GameType gameType = gameTypeService.findByName(command.getAttributesCommand().get(0));
         if (gameType != null) {
             response.setStatus(CommandConstants.COMMAND_STATUS_SUCCESS);
-            response.setMessage("Leaderbord for " + gameType.getType() + " game type: \n" + userService.getLeaderboard(gameType).toString());
+            response.setMessage(constructLeaderboard(userService.getLeaderboard(gameType), gameType));
         } else {
             response.setStatus(CommandConstants.COMMAND_STATUS_FAILURE);
             response.setMessage("There's no such game");
         }
 
         return response;
+    }
+
+    private String constructLeaderboard(List<User> users, GameType gameType) {
+        StringBuilder leaderboard = new StringBuilder("Leaderboard for " + gameType.getType() + " game type: \n");
+
+        for (User user : users) {
+            leaderboard.append(user.getUsername() + " " + user.getGameStat(gameType).getWinAmount() + "\n");
+        }
+
+        return leaderboard.toString();
     }
 }
