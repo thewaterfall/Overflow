@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import waterfall.communication.Sender;
 import waterfall.communication.server.ClientHandler;
-import waterfall.game.PlayerFactory;
+import waterfall.game.GameFactory;
+import waterfall.game.GameFactoryImpl;
 import waterfall.model.Account;
 import waterfall.model.Lobby;
 import waterfall.protocol.Command;
@@ -24,10 +25,10 @@ public class ConnectCommand implements CommandAction {
     @Inject
     private LobbyService lobbyService;
 
-    private PlayerFactory playerFactory;
+    private GameFactory gameFactory;
 
     public ConnectCommand() {
-        playerFactory = new PlayerFactory();
+        gameFactory = new GameFactoryImpl();
     }
 
     @Override
@@ -49,7 +50,7 @@ public class ConnectCommand implements CommandAction {
                 lobby.addUser(account.getUser());
                 lobbyService.update(lobby);
 
-                account.setPlayer(playerFactory.getBean(lobby.getGameType().getType()));
+                account.setPlayer(gameFactory.getPlayer(lobby.getGameType().getType()));
 
                 account.findOpponentHandler();
 

@@ -2,10 +2,7 @@ package waterfall.protocol.command;
 
 import com.google.inject.Inject;
 import waterfall.communication.server.ClientHandler;
-import waterfall.game.Game;
-import waterfall.game.GameFactory;
-import waterfall.game.Player;
-import waterfall.game.PlayerFactory;
+import waterfall.game.GameFactoryImpl;
 import waterfall.model.Account;
 import waterfall.model.Lobby;
 import waterfall.protocol.Command;
@@ -25,12 +22,10 @@ public class PlayCommand implements CommandAction {
     @Inject
     private GameTypeService gameTypeService;
 
-    private GameFactory gameFactory;
-    private PlayerFactory playerFactory;
+    private GameFactoryImpl gameFactory;
 
     public PlayCommand() {
-        this.gameFactory = new GameFactory();
-        this.playerFactory = new PlayerFactory();
+        this.gameFactory = new GameFactoryImpl();
     }
 
     @Override
@@ -49,9 +44,9 @@ public class PlayCommand implements CommandAction {
 
             currentLobby.addUser(account.getUser());
 
-            currentLobby.setGame((Game) gameFactory.getBean(command.getAttributesCommand().get(0)));
+            currentLobby.setGame(gameFactory.getGame(command.getAttributesCommand().get(0)));
             currentLobby.setGameType(gameTypeService.findByName(command.getAttributesCommand().get(0)));
-            account.setPlayer((Player) playerFactory.getBean(command.getAttributesCommand().get(0)));
+            account.setPlayer(gameFactory.getPlayer(command.getAttributesCommand().get(0)));
             currentLobby.getGame().registerPlayer(account.getPlayer());
 
             lobbyService.save(currentLobby);
