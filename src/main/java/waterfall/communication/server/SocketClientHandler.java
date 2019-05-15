@@ -5,7 +5,10 @@ import waterfall.model.Account;
 import waterfall.protocol.Command;
 import waterfall.protocol.CommandConstants;
 import waterfall.protocol.CommandUtil;
+import waterfall.protocol.command.CommandAction;
 import waterfall.protocol.command.CommandHandler;
+import waterfall.protocol.validation.ValidationResult;
+import waterfall.protocol.validation.Validator;
 
 import java.io.*;
 import java.net.Socket;
@@ -20,12 +23,15 @@ public class SocketClientHandler implements ClientHandler {
     @Inject
     private CommandUtil commandUtil;
 
+    private Validator validator;
+
     private Account account;
 
     private boolean isStopped = true;
 
     public SocketClientHandler() {
         this.account = new Account(this);
+        this.validator = new Validator();
     }
 
     @Override
@@ -99,7 +105,18 @@ public class SocketClientHandler implements ClientHandler {
     @Override
     public Command processCommand(Command command) {
         command = verifyAuth(command);
-        Command response = CommandHandler.getCommand(command.getTypeCommand()).execute(this, command);
+
+        CommandAction commandAction = CommandHandler.getCommand(command.getTypeCommand());
+
+        // Command validation
+        ValidationResult result = validator.validate(command, CommandHandler.getValidations(command.getTypeCommand()));
+
+        if(!result.isValid()) {
+            return result.getErrorCommand();
+        }
+
+        // Command execution
+        Command response = commandAction.execute(this, command);
 
         return response;
     }

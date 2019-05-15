@@ -1,12 +1,19 @@
 package waterfall.protocol.command;
 
+import com.google.inject.Guice;
 import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 import waterfall.communication.server.ClientHandler;
+import waterfall.injection.Module;
 import waterfall.model.Account;
 import waterfall.model.User;
 import waterfall.protocol.Command;
 import waterfall.protocol.CommandConstants;
 import waterfall.protocol.CommandUtil;
+import waterfall.protocol.validation.LoginValidation;
+import waterfall.protocol.validation.Validation;
+import waterfall.protocol.validation.Validator;
 import waterfall.security.Security;
 
 public class LoginCommand implements CommandAction {
@@ -17,6 +24,10 @@ public class LoginCommand implements CommandAction {
     @Inject
     private CommandUtil commandUtil;
 
+    public LoginCommand() {
+
+    }
+
     @Override
     public Command execute(ClientHandler clientHandler, Command command) {
         Account account = clientHandler.getAccount();
@@ -26,6 +37,7 @@ public class LoginCommand implements CommandAction {
                 CommandConstants.COMMAND_TYPE_HANDLER,
                 CommandConstants.COMMAND_STATUS_SUCCESS
         );
+
 
         if(!account.isLoggedIn()) {
             User user = login(command.getAttributesCommand().get(0), command.getAttributesCommand().get(1));
