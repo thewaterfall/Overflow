@@ -24,7 +24,13 @@ public class ChessGame implements Game {
      */
     @Override
     public String playMove(Move move, Player player) {
-        String message = isValidMove(move.getStart(), move.getDestination(), player, false);
+        String message;
+        try {
+            message = isValidMove(move.getStart(), move.getDestination(), player, false);
+        } catch(Exception e) {
+            message = "Invalid move";
+        }
+
         if(message.equals("Valid move")) {
             ChessTile fromTile = (ChessTile) board.getBoardArray()[move.getStart().getY()][move.getStart().getX()];
             ChessPiece pieceToMove = fromTile.getPiece();
