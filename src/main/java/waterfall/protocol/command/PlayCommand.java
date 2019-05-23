@@ -2,7 +2,10 @@ package waterfall.protocol.command;
 
 import com.google.inject.Inject;
 import waterfall.communication.server.ClientHandler;
+import waterfall.communication.server.SocketClientHandler;
+import waterfall.game.AIPlayer;
 import waterfall.game.GameFactoryImpl;
+import waterfall.game.Player;
 import waterfall.model.Account;
 import waterfall.model.Lobby;
 import waterfall.protocol.Command;
@@ -52,7 +55,7 @@ public class PlayCommand implements CommandAction {
             lobbyService.save(currentLobby);
 
             if (command.getAttributesCommand().size() > 1 && command.getAttributesCommand().get(1).equals("bot")) {
-                // TODO add logic to play vs bot
+                constructAIPlayer(clientHandler, command);
                 response.setMessage("The game has been started.");
             } else {
                 response.setMessage("Lobby has been created with id: " + currentLobby.getId());
@@ -65,4 +68,18 @@ public class PlayCommand implements CommandAction {
         return response;
     }
 
+    private void constructAIPlayer(ClientHandler clientHandler, Command command) {
+        Player aiPlayer = gameFactory.getPlayer("ai" + command.getAttributesCommand().get(0));
+
+        ClientHandler aiHandler = new SocketClientHandler();
+        aiHandler.getAccount().setPlayer(aiPlayer);
+        aiHandler.getAccount().setLobby(clientHandler.getAccount().getLobby());
+        aiHandler.getAccount().setOpponentHandler(clientHandler);
+
+        clientHandler.getAccount().setOpponentHandler(aiHandler);
+
+        clientHandler.getAccount().getLobby().getGame().registerPlayer(aiPlayer);
+
+        new Thread(aiHandler).start();
+    }
 }

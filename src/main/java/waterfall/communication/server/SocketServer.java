@@ -2,6 +2,7 @@ package waterfall.communication.server;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import waterfall.game.AIPlayer;
 import waterfall.game.GameFactory;
 import waterfall.game.GameFactoryImpl;
 import waterfall.game.UserPlayer;
@@ -36,6 +37,7 @@ public class SocketServer implements Server {
         this.gameFactory = new GameFactoryImpl();
         this.gameFactory.register("chess", ChessGame.class);
         this.gameFactory.register("chess", UserPlayer.class);
+        this.gameFactory.register("aichess", AIPlayer.class);
     }
 
     @Override
