@@ -25,7 +25,13 @@ public class ChessGame implements Game {
      */
     @Override
     public String playMove(Move move, Player player) {
-        String message = isValidMove(move.getStart(), move.getDestination(), player, false);
+        String message;
+        try {
+            message = isValidMove(move.getStart(), move.getDestination(), player, false);
+        } catch(Exception e) {
+            message = "Invalid move";
+        }
+
         if(message.equals("Valid move")) {
             applyMove(move, this.board);
             endTurn();
@@ -211,11 +217,11 @@ public class ChessGame implements Game {
 
         if (fromPiece == null) {
             return "Piece is not chosen";
-        } else if (fromPiece.getColor() != currentPlayer) {
+        } else if (fromPiece.getColor() != currentPlayer && hypothetical != true) {
             return "Not your piece";
-        } else if (toPiece != null && toPiece.getColor() == currentPlayer) {
+        } else if (toPiece != null && toPiece.getColor() == currentPlayer && hypothetical != true) {
             return "The tile is blocked with your piece";
-        } else if (isValidMoveForPiece(from, to)) {
+        } else if (isValidMoveForPiece(from, to, hypothetical)) {
             //if hypothetical and valid, return true
             if (hypothetical) return "Valid move";
 
@@ -411,23 +417,23 @@ public class ChessGame implements Game {
             int newY = currentY + moveRule.y;
             if (newX < 0 || newX > 7 || newY < 0 || newY > 7) continue;
             Coordinates newLocation = new Coordinates(newX, newY);
-            if (isValidMoveForPiece(currentLocation, newLocation)) possibleMoves.add(newLocation);
+            if (isValidMoveForPiece(currentLocation, newLocation, false)) possibleMoves.add(newLocation);
         }
         return possibleMoves.toArray(new Coordinates[0]);
     }
 
     // Checks whether a given move from from one coordinates to another is valid.
-    private boolean isValidMoveForPiece(Coordinates from, Coordinates to) {
+    private boolean isValidMoveForPiece(Coordinates from, Coordinates to, boolean hypothetical) {
         ChessPiece fromPiece = board.getTileFromCoordinates(from).getPiece();
         boolean repeatableMoves = fromPiece.hasRepeatableMoves();
 
         return repeatableMoves
-                ? isValidMoveForPieceRepeatable(from, to)
+                ? isValidMoveForPieceRepeatable(from, to, hypothetical)
                 : isValidMoveForPieceNonRepeatable(from, to);
     }
 
     // Check whether a given move is valid for a piece without repeatable moves.
-    private boolean isValidMoveForPieceRepeatable(Coordinates from, Coordinates to) {
+    private boolean isValidMoveForPieceRepeatable(Coordinates from, Coordinates to, boolean hypothetical) {
         ChessPiece fromPiece = board.getTileFromCoordinates(from).getPiece();
         MoveRule[] validMoveRules = fromPiece.getMoveRules();
 
@@ -448,7 +454,7 @@ public class ChessGame implements Game {
                             return false;
 
                         //if last moveRule and toTile is empty or holds opponents piece, return true
-                        if (j == i && (tile.isEmpty() || tile.getPiece().getColor() != currentPlayer))
+                        if (j == i && (tile.isEmpty() || (tile.getPiece().getColor() != currentPlayer || hypothetical)))
                             return true;
                     }
                 }
@@ -496,5 +502,9 @@ public class ChessGame implements Game {
                     ? from.getY() == 6
                     : from.getY() == 1;
         }
+    }
+
+    public Player getCurrentPlayer() {
+        return player;
     }
 }

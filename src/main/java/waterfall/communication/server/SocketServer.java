@@ -2,12 +2,10 @@ package waterfall.communication.server;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import waterfall.game.Factory;
 import waterfall.game.GameFactory;
-import waterfall.game.PlayerFactory;
+import waterfall.game.GameFactoryImpl;
 import waterfall.game.UserPlayer;
 import waterfall.game.chess.ChessGame;
-import waterfall.game.chess.pieces.AIChessPlayer;
 import waterfall.injection.Module;
 
 import java.io.IOException;
@@ -21,10 +19,9 @@ import java.util.concurrent.Executors;
 public class SocketServer implements Server {
     private ServerSocket serverSocket;
     private ExecutorService threadPool;
-    private List<SocketClientHandler> clientHandlerList;
+    private List<ClientHandler> clientHandlerList;
     private Injector injector;
-    private Factory gameFactory;
-    private Factory playerFactory;
+    private GameFactory gameFactory;
 
     private int port;
 
@@ -36,12 +33,9 @@ public class SocketServer implements Server {
         this.clientHandlerList = new ArrayList<>(clients);
         this.injector = Guice.createInjector(new Module());
 
-        this.gameFactory = new GameFactory();
+        this.gameFactory = new GameFactoryImpl();
         this.gameFactory.register("chess", ChessGame.class);
-
-        this.playerFactory = new PlayerFactory();
-        this.playerFactory.register("chess", UserPlayer.class);
-        this.playerFactory.register("aichess", AIChessPlayer.class);
+        this.gameFactory.register("chess", UserPlayer.class);
     }
 
     @Override

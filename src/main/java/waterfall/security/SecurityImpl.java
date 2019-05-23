@@ -19,4 +19,9 @@ public class SecurityImpl implements Security {
 
         return user;
     }
+
+    @Override
+    public void logout(User user) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -24,7 +24,7 @@ public class Command {
         this.status = status;
         this.source = source;
         this.fullCommand = fullCommand;
-        this.message = fullCommand;
+        this.message = "";
         this.parameters = new HashMap<>();
         this.attributesCommand = new ArrayList<>();
 

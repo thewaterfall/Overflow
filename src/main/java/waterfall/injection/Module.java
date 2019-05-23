@@ -1,7 +1,8 @@
 package waterfall.injection;
 
 import com.google.inject.AbstractModule;
-import java.net.Socket;
+import waterfall.communication.Sender;
+import waterfall.communication.SenderImpl;
 import waterfall.communication.client.Client;
 import waterfall.communication.client.SocketClient;
 import waterfall.communication.server.ClientHandler;
@@ -32,5 +33,7 @@ public class Module extends AbstractModule {
 
         bind(Client.class).to(SocketClient.class);
         bind(ClientHandler.class).to(SocketClientHandler.class);
+
+        bind(Sender.class).to(SenderImpl.class);
     }
 }

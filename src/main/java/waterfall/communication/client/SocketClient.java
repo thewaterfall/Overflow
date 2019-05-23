@@ -2,17 +2,14 @@ package waterfall.communication.client;
 
 import com.google.inject.Inject;
 import waterfall.exception.ClientIsStoppedException;
-import waterfall.exception.IllegalCommandException;
 import waterfall.game.Board;
 import waterfall.gui.GUI;
-import waterfall.model.User;
 import waterfall.protocol.Command;
 import waterfall.protocol.CommandConstants;
 import waterfall.protocol.CommandUtil;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.List;
 
 public class SocketClient implements Client {
     private GUI gui;
@@ -27,8 +24,6 @@ public class SocketClient implements Client {
 
     private String iphost;
     private int port;
-
-    private User user;
 
     @Inject
     private CommandUtil commandUtil;
@@ -83,16 +78,10 @@ public class SocketClient implements Client {
         if (isStopped())
             throw new ClientIsStoppedException("Can't send request. Client-side is stopped.");
 
-        Command command = null;
-        try {
-            command = commandUtil.constructCommand(request, CommandConstants.COMMAND_TYPE_REQUEST,
-                    CommandConstants.COMMAND_SOURCE_CLIENT, null);
-        } catch (IllegalCommandException e) {
-            e.printStackTrace();
-            gui.write(e.getMessage());
-            // TODO when exception is caught, then no need to go next
-            return;
-        }
+        Command command = commandUtil.constructCommand(request,
+                CommandConstants.COMMAND_TYPE_REQUEST,
+                CommandConstants.COMMAND_SOURCE_CLIENT,
+                null);
 
         try {
             output.write(commandUtil.covertToString(command));
@@ -129,35 +118,15 @@ public class SocketClient implements Client {
 
     @Override
     public void processCommand(Command command) {
-        // /login [username] [password]
-        if (command.getTypeCommand().equals("/login") &&
-                command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
-            user = (User) command.getParameter("user");
-        } else if (command.getTypeCommand().equals("/logout") &&
-                command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) { // /logout
-            user = null;
-        } else if (command.getTypeCommand().equals("/play")) { // play [game] [player/bot]
+        if (command.getTypeCommand().equals("/exit")) {
+            stopConnection();
+        }
 
-        } else if (command.getTypeCommand().equals("/connect")) {  // /connect [lobbyId]
-
-        } else if (command.getTypeCommand().equals("/message")) {
+        if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS) &&
+                command.getParameter("board") != null) {
             board = (Board) command.getParameter("board");
-            if(board != null) {
-                gui.updateBoard(board);
-                gui.update();
-            }
-        } else if (command.getTypeCommand().equals("/move")) {  // /move [from] [to]
-            if(command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
-                board = (Board) command.getParameter("board");
-                gui.updateBoard(board);
-                gui.update();
-            }
-        } else if (command.getTypeCommand().equals("/leaderboard")) { // /leaderboard [gameType]
-            if (command.getStatus().equals(CommandConstants.COMMAND_STATUS_SUCCESS)) {
-                gui.write(((List) command.getParameter("leaderboard")).toString());
-            }
-        } else if(command.getTypeCommand().equals("/disconnect")) {
-
+            gui.updateBoard(board);
+            gui.update();
         }
 
         gui.write(command.getMessage());
