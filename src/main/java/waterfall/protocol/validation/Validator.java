@@ -2,11 +2,12 @@ package waterfall.protocol.validation;
 
 
 import com.google.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 import waterfall.protocol.Command;
 import waterfall.protocol.CommandConstants;
 import waterfall.protocol.CommandUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Validator {
 
@@ -17,9 +18,10 @@ public class Validator {
         Command errorResponse = null;
 
         List<String> errors = new ArrayList<>();
-
-        for(Validation validation: validations) {
-            errors.addAll(validation.validate(command));
+        if (validations != null) {
+            for (Validation validation : validations) {
+                errors.addAll(validation.validate(command));
+            }
         }
 
         if(!errors.isEmpty()) {
