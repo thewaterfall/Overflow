@@ -8,7 +8,10 @@ import waterfall.protocol.validation.LoginValidation;
 import waterfall.protocol.validation.MoveValidation;
 import waterfall.protocol.validation.Validation;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 // TODO: refactor
 public class CommandHandler {
@@ -31,6 +34,7 @@ public class CommandHandler {
         commandActions.put(CommandConstants.COMMAND_DISCONNECT, injector.getInstance(DisconnectCommand.class));
         commandActions.put(CommandConstants.COMMAND_EXIT, injector.getInstance(ExitCommand.class));
         commandActions.put(CommandConstants.COMMAND_MESSAGE, injector.getInstance(MessageCommand.class));
+        commandActions.put(CommandConstants.COMMAND_CONNECT, injector.getInstance(ConnectCommand.class));
     }
 
     public static CommandAction getCommand(String command) {

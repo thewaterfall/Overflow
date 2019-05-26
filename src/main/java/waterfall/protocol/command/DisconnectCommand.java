@@ -47,7 +47,9 @@ public class DisconnectCommand implements CommandAction {
         Account account = clientHandler.getAccount();
         command.setMessage(account.getUser().getUsername() + " has disconnected");
 
-        sender.send(Arrays.asList(account.getOpponentHandler()), command);
+        if (account.getOpponentHandler() != null) {
+            sender.send(Arrays.asList(account.getOpponentHandler()), command);
+        }
 
         account.getLobby().removeUser(account.getUser());
         account.getLobby().getGame().unregisterPlayer(account.getPlayer());
