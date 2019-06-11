@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import waterfall.game.GameFactory;
 import waterfall.game.GameFactoryImpl;
 import waterfall.game.UserPlayer;
+import waterfall.game.checkers.CheckersGame;
 import waterfall.game.chess.ChessGame;
 import waterfall.injection.Module;
 
@@ -36,6 +37,9 @@ public class SocketServer implements Server {
         this.gameFactory = new GameFactoryImpl();
         this.gameFactory.register("chess", ChessGame.class);
         this.gameFactory.register("chess", UserPlayer.class);
+
+        this.gameFactory.register("checkers", CheckersGame.class);
+        this.gameFactory.register("checkers", UserPlayer.class);
     }
 
     @Override
