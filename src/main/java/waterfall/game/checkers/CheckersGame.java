@@ -51,7 +51,25 @@ public class CheckersGame implements Game{
 
 	@Override
 	public Move convertToMove(String coordsMove) {
-		return null;
+		char alphaCoordinates[] = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+		String[] coordinates = coordsMove.split("\\s+");
+
+		int firstCoord = 0;
+		for (int i = 0; i < alphaCoordinates.length; i++) {
+			if (alphaCoordinates[i] == coordinates[0].charAt(0)) {
+				firstCoord = i;
+			}
+		}
+
+		int secondCoord = 0;
+		for (int i = 0; i < alphaCoordinates.length; i++) {
+			if (alphaCoordinates[i] == coordinates[1].charAt(0)) {
+				secondCoord = i;
+			}
+		}
+
+		return new Move(new Coordinates(Character.getNumericValue(coordinates[0].charAt(1)), firstCoord),
+				new Coordinates(Character.getNumericValue(coordinates[1].charAt(1)), secondCoord));
 	}
 
 	@Override
@@ -127,10 +145,10 @@ public class CheckersGame implements Game{
 	}
 
 	public void movePiece(Move move) {
-		int sourceRow = move.getStart().getX();
-		int sourceCol = move.getStart().getY();
-		int destRow = move.getDestination().getX();
-		int destCol = move.getDestination().getY();
+		int sourceRow = move.getStart().getY();
+		int sourceCol = move.getStart().getX();
+		int destRow = move.getDestination().getY();
+		int destCol = move.getDestination().getX();
 
 		CheckersTile fromTile = board.getBoardArray()[sourceRow][sourceCol];
 		CheckersTile toTile = board.getBoardArray()[destRow][destCol];
@@ -184,8 +202,8 @@ public class CheckersGame implements Game{
 	 */
 	public ArrayList<Move> generateJumpMovesForPiece(CheckersPiece p, Coordinates location) {
 		ArrayList<Move> jumps = new ArrayList<Move>();
-		int row = location.getX(),
-				col = location.getY();
+		int row = location.getY(),
+				col = location.getX();
 		boolean up = p.getColor() == Color.White || p instanceof King;
 		boolean down = p.getColor() == Color.Black || p instanceof King;
 		if (up) {
@@ -228,8 +246,8 @@ public class CheckersGame implements Game{
 	 */
 	public ArrayList<Move> generateRegularMovesForPiece(CheckersPiece p, Coordinates location) {
 		ArrayList<Move> avail_moves = new ArrayList<Move>();
-		int row = location.getX();
-		int col = location.getY();
+		int row = location.getY();
+		int col = location.getX();
 		boolean up, down;
 		up = p.getColor() == Color.White || p instanceof King;
 		down = p.getColor() == Color.Black || p instanceof King;
@@ -274,8 +292,8 @@ public class CheckersGame implements Game{
 	 */
 	public boolean isValidJump(Move move) {
 		if (isValidSquare(move.getDestination())) {
-			CheckersPiece monkey = board.getBoardArray()[(move.getDestination().getX() + move.getStart().getX())/2][(move.getDestination().getY() + move.getStart().getY())/2].getPiece();
-			CheckersPiece toMove = board.getBoardArray()[move.getStart().getX()][move.getStart().getY()].getPiece();
+			CheckersPiece monkey = board.getBoardArray()[(move.getDestination().getY() + move.getStart().getY())/2][(move.getDestination().getX() + move.getStart().getX())/2].getPiece();
+			CheckersPiece toMove = board.getBoardArray()[move.getStart().getY()][move.getStart().getX()].getPiece();
 			return !isOccupied(move.getDestination())
 					&& monkey != null
 					&& monkey.getColor() == opposite(toMove.getColor());
@@ -294,7 +312,7 @@ public class CheckersGame implements Game{
 	 * return false otherwise
 	 */
 	public boolean isOccupied(Coordinates location) {
-		return !board.getBoardArray()[location.getX()][location.getY()].isEmpty();
+		return !board.getBoardArray()[location.getY()][location.getX()].isEmpty();
 	}
 
 	public boolean canPromote(CheckersPiece p, Coordinates location) {

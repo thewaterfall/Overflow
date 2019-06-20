@@ -20,6 +20,7 @@ public class CheckersBoard implements Board {
 
 	public CheckersBoard() {
 		init();
+		fillBoard();
 	}
 
 	@Override
@@ -33,12 +34,28 @@ public class CheckersBoard implements Board {
 	private void init() {
 		representation = new CheckersTile[BOARD_SIZE][BOARD_SIZE];
 
-		for (int row = 0; row < 3; row++){
-			for (int col = 0; col < 4; col++) {
-				CheckersTile white_piece = new CheckersTile(Color.White, new Normal(Color.White));
-				CheckersTile black_piece = new CheckersTile(Color.Black, new Normal(Color.Black));
-				representation[BOARD_SIZE - row - 1][2*col+ (row % 2)] = white_piece;
-				representation[row][2*col + (BOARD_SIZE - 1 - row) %2] = black_piece;
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if ((j + i) % 2 == 0)
+					representation[j][i] = new CheckersTile(Color.Black);
+				else
+					representation[j][i] = new CheckersTile(Color.White);
+			}
+		}
+	}
+
+	private void fillBoard() {
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 3; j++) {
+				if ((j + i) % 2 != 0)
+					representation[j][i].setPiece(new Normal(Color.Black));
+			}
+		}
+
+		for (int i = 0; i < 8; i++) {
+			for (int j = 5; j < 8; j++) {
+				if ((j + i) % 2 != 0)
+					representation[j][i].setPiece(new Normal(Color.White));
 			}
 		}
 	}
